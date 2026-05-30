@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BROTE — Evalúa tu idea</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c0a;
+  --bg2: #0e1410;
+  --bg3: #131a14;
+  --orange: #FF6B2B;
+  --orange-dim: #7a2f0d;
+  
+  
+  --orange-glow: rgba(255,107,43,0.12);
+  
+  --orange-glow2: rgba(255,107,43,0.06);
+  
+  --text: #e8ede9;
+  --text2: #8a9e8c;
+  --text3: #4a5c4c;
+  --border: rgba(255,107,43,0.12);
+  --border2: rgba(255,107,43,0.06);
+  --card: rgba(255,255,255,0.03);
+  --radius: 12px;
+  --radius-lg: 20px;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── NOISE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: 0.4;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--orange-dim); border-radius: 2px; }
+
+/* ── NAVBAR ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 5%;
+  height: 64px;
+  background: rgba(8,12,10,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border2);
+  transition: border-color 0.3s;
+}
+nav.scrolled { border-bottom-color: var(--border); }
+
+.nav-logo {
+  font-family: var(--font-head);
+  font-size: 22px; font-weight: 800;
+  color: var(--orange);
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  display: flex; align-items: center; gap: 8px;
+}
+.nav-logo span { color: var(--text); }
+
+.nav-links {
+  display: flex; align-items: center; gap: 2px;
+  list-style: none;
+}
+.nav-links a {
+  color: var(--text2); font-size: 14px; text-decoration: none;
+  padding: 6px 14px; border-radius: 8px;
+  transition: color 0.2s, background 0.2s;
+}
+.nav-links a:hover { color: var(--text); background: var(--card); }
+
+.nav-cta {
+  background: var(--orange) !important; color: #fff !important;
+  font-weight: 500; border-radius: 8px !important;
+  padding: 7px 18px !important;
+  transition: opacity 0.2s !important;
+}
+.nav-cta:hover { opacity: 0.85 !important; background: var(--orange) !important; }
+
+.hamburger {
+  display: none; flex-direction: column; gap: 5px; cursor: pointer;
+  background: none; border: none; padding: 4px;
+}
+.hamburger span { display: block; width: 22px; height: 1.5px; background: var(--text2); transition: all 0.3s; }
+
+.mobile-menu {
+  display: none; position: fixed; top: 64px; left: 0; right: 0;
+  background: rgba(8,12,10,0.97); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border); z-index: 99;
+  padding: 16px 5%;
+  flex-direction: column; gap: 4px;
+}
+.mobile-menu a { color: var(--text2); font-size: 15px; text-decoration: none; padding: 12px 0; display: block; border-bottom: 1px solid var(--border2); }
+.mobile-menu a:hover { color: var(--orange); }
+.mobile-menu.open { display: flex; }
+
+/* ── SECTIONS ── */
+section { position: relative; z-index: 1; }
+
+/* ── HERO ── */
+#inicio {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 120px 5% 80px;
+  overflow: hidden;
+}
+
+.hero-glow {
+  position: absolute; top: -10%; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 700px;
+  background: radial-gradient(ellipse, rgba(255,107,43,0.09) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-glow2 {
+  position: absolute; bottom: 0; right: -10%;
+  width: 400px; height: 400px;
+  background: radial-gradient(ellipse, rgba(255,107,43,0.06) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--orange); border: 1px solid rgba(255,107,43,0.25);
+  padding: 6px 16px; border-radius: 100px;
+  margin-bottom: 2rem;
+  animation: fadeUp 0.6s ease both;
+}
+.hero-badge::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--orange); animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.hero-h1 {
+  font-family: var(--font-head);
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.5rem;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+.hero-h1 .green { color: var(--orange); }
+.hero-h1 .outline {
+  -webkit-text-stroke: 1px rgba(255,107,43,0.35);
+  color: transparent;
+}
+
+.hero-sub {
+  font-size: clamp(16px, 2.5vw, 19px);
+  color: var(--text2); max-width: 560px;
+  margin: 0 auto 2.5rem;
+  animation: fadeUp 0.6s 0.2s ease both;
+  font-weight: 300; line-height: 1.7;
+}
+
+.hero-btns {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  animation: fadeUp 0.6s 0.3s ease both;
+}
+
+.btn-primary {
+  background: var(--orange); color: var(--bg);
+  padding: 14px 32px; border-radius: var(--radius);
+  font-size: 15px; font-weight: 500; text-decoration: none;
+  transition: opacity 0.2s, transform 0.2s; border: none; cursor: pointer;
+  font-family: var(--font-body);
+}
+.btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+
+.btn-outline {
+  background: transparent; color: var(--text);
+  padding: 13px 28px; border-radius: var(--radius);
+  font-size: 15px; font-weight: 400; text-decoration: none;
+  border: 1px solid var(--border); cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  font-family: var(--font-body);
+}
+.btn-outline:hover { border-color: rgba(74,255,122,0.3); background: var(--orange-glow2); }
+
+.hero-stats {
+  display: flex; gap: 40px; margin-top: 4rem; flex-wrap: wrap; justify-content: center;
+  animation: fadeUp 0.6s 0.4s ease both;
+}
+.stat { text-align: center; }
+.stat-num { font-family: var(--font-head); font-size: 32px; font-weight: 800; color: var(--orange); line-height: 1; }
+.stat-label { font-size: 12px; color: var(--text3); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
+
+/* ── DIVIDER ── */
+.section-divider {
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+/* ── SECTION COMMON ── */
+.section-wrap { padding: 100px 5%; max-width: 1200px; margin: 0 auto; }
+
+.section-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--orange); margin-bottom: 16px;
+}
+.section-tag::before { content:''; width:20px; height:1px; background:var(--orange); }
+
+.section-title {
+  font-family: var(--font-head);
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 800; line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+.section-sub {
+  color: var(--text2); font-size: 17px; max-width: 540px;
+  font-weight: 300; line-height: 1.7; margin-bottom: 56px;
+}
+
+/* ── CÓMO FUNCIONA ── */
+#como-funciona { background: var(--bg2); }
+
+.steps-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2px;
+  border: 1px solid var(--border2); border-radius: var(--radius-lg); overflow: hidden;
+}
+.step-card {
+  background: var(--bg2); padding: 40px 32px;
+  border-right: 1px solid var(--border2);
+  transition: background 0.3s;
+  position: relative;
+}
+.step-card:last-child { border-right: none; }
+.step-card:hover { background: var(--bg3); }
+.step-card:hover .step-num { color: var(--orange); }
+
+.step-num {
+  font-family: var(--font-head); font-size: 13px; font-weight: 800;
+  color: var(--text3); letter-spacing: 0.08em;
+  margin-bottom: 20px; transition: color 0.3s;
+}
+.step-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px; font-size: 22px;
+  background: var(--orange-glow2);
+}
+.step-card h3 { font-family: var(--font-head); font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+.step-card p { font-size: 14px; color: var(--text2); line-height: 1.65; font-weight: 300; }
+
+/* ── EVALUADOR ── */
+#evaluador { background: var(--bg); }
+
+.eval-container {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.eval-header {
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--border2);
+  display: flex; align-items: center; gap: 10px;
+}
+.eval-header h3 { font-family: var(--font-head); font-size: 16px; font-weight: 700; }
+.eval-header span { font-size: 13px; color: var(--text3); margin-left: auto; }
+.dot { width: 8px; height: 8px; border-radius: 50%; }
+.dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: var(--orange); }
+
+.eval-body { padding: 32px; }
+
+.eval-label { font-size: 13px; color: var(--text2); margin-bottom: 10px; font-weight: 300; }
+.eval-textarea {
+  width: 100%; min-height: 110px; padding: 16px;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text); font-size: 15px;
+  font-family: var(--font-body); font-weight: 300; resize: vertical; line-height: 1.6;
+  transition: border-color 0.2s;
+}
+.eval-textarea:focus { outline: none; border-color: rgba(255,107,43,0.35); }
+.eval-textarea::placeholder { color: var(--text3); }
+
+.eval-btn {
+  margin-top: 14px;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--orange); color: #fff;
+  padding: 12px 28px; border-radius: var(--radius);
+  font-size: 14px; font-weight: 500; border: none; cursor: pointer;
+  font-family: var(--font-body); transition: opacity 0.2s, transform 0.2s;
+}
+.eval-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.eval-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.spinner { width: 14px; height: 14px; border: 1.5px solid rgba(8,12,10,0.3); border-top-color: var(--bg); border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+.eval-btn.loading .spinner { display: block; }
+.eval-btn.loading .btn-txt { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.eval-error { color: #ff6b6b; font-size: 13px; margin-top: 8px; display: none; }
+
+/* dashboard */
+.eval-dashboard { display: none; padding: 32px; border-top: 1px solid var(--border2); }
+.eval-dashboard.visible { display: block; animation: fadeUp 0.4s ease; }
+
+.dash-scores { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 24px; }
+.dash-score-card {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border2);
+  border-radius: var(--radius); padding: 16px 14px;
+}
+.dsc-label { font-size: 11px; color: var(--text3); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
+.dsc-val { font-family: var(--font-head); font-size: 30px; font-weight: 800; line-height: 1; margin-bottom: 8px; }
+.dsc-bar-bg { height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; }
+.dsc-bar { height: 3px; border-radius: 2px; background: var(--orange); transition: width 1.2s cubic-bezier(.16,1,.3,1); }
+
+.verdict-panel {
+  background: rgba(255,107,43,0.06); border: 1px solid rgba(255,107,43,0.20);
+  border-radius: var(--radius); padding: 20px 24px; margin-bottom: 24px;
+  display: flex; gap: 16px; align-items: flex-start;
+}
+.v-emoji { font-size: 28px; flex-shrink: 0; }
+.v-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin-bottom: 6px; color: var(--orange); }
+.v-text { font-size: 14px; color: var(--text2); line-height: 1.6; font-weight: 300; }
+
+.dash-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.dash-panel { background: rgba(255,255,255,0.02); border: 1px solid var(--border2); border-radius: var(--radius); padding: 20px; }
+.dp-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 14px; font-weight: 500; }
+
+.pill-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 400; }
+.pill-g { background: rgba(255,107,43,0.10); color: #FF6B2B; border: 1px solid rgba(255,107,43,0.20); }
+.pill-r { background: rgba(255,80,80,0.1); color: #ff6b6b; border: 1px solid rgba(255,80,80,0.2); }
+
+.budget-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 24px; }
+.bg-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border2); border-radius: var(--radius); padding: 16px; }
+.bg-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); margin-bottom: 6px; }
+.bg-val { font-family: var(--font-head); font-size: 14px; font-weight: 700; color: var(--orange); }
+
+.comp-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 24px; }
+.comp-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border2); border-radius: var(--radius); }
+.comp-name { font-size: 14px; font-weight: 500; }
+.comp-desc { font-size: 12px; color: var(--text3); }
+.comp-tag { font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+.comp-direct { background: rgba(255,80,80,0.12); color: #ff6b6b; }
+.comp-indirect { background: rgba(255,180,60,0.12); color: #ffb43c; }
+.comp-none { background: rgba(255,107,43,0.10); color: var(--orange); }
+
+.tips-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+.tip-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border2); border-radius: var(--radius); font-size: 14px; color: var(--text2); font-weight: 300; line-height: 1.5; }
+.tip-n { font-family: var(--font-head); font-size: 12px; color: var(--text3); min-width: 18px; padding-top: 2px; }
+
+.improve-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; color: var(--orange);
+  padding: 12px 24px; border-radius: var(--radius);
+  border: 1px solid rgba(74,255,122,0.3);
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  font-family: var(--font-body); transition: background 0.2s;
+}
+.improve-btn:hover { background: var(--orange-glow); }
+
+/* ── PRECIOS ── */
+#precios { background: var(--bg2); }
+
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.price-card {
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: var(--radius-lg); padding: 36px 28px;
+  transition: border-color 0.3s, transform 0.3s;
+  position: relative;
+}
+.price-card:hover { border-color: var(--border); transform: translateY(-4px); }
+.price-card.featured {
+  border-color: rgba(255,107,43,0.35);
+  background: linear-gradient(145deg, rgba(255,107,43,0.06), var(--bg3));
+}
+.featured-badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--orange); color: #fff;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 4px 16px; border-radius: 100px;
+}
+.pc-plan { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 16px; }
+.pc-price { font-family: var(--font-head); font-size: 48px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+.pc-price span { font-size: 18px; font-weight: 400; color: var(--text2); }
+.pc-desc { font-size: 14px; color: var(--text2); margin-bottom: 28px; font-weight: 300; }
+.pc-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+.pc-features li { font-size: 14px; color: var(--text2); display: flex; gap: 8px; font-weight: 300; }
+.pc-features li::before { content: '✓'; color: var(--orange); font-weight: 700; flex-shrink: 0; }
+.pc-features li.off { color: var(--text3); }
+.pc-features li.off::before { content: '—'; color: var(--text3); }
+
+/* ── FAQ ── */
+#sobre-nosotros { background: var(--bg); }
+
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; margin-bottom: 80px; }
+.about-text p { font-size: 16px; color: var(--text2); font-weight: 300; line-height: 1.8; margin-bottom: 16px; }
+.about-values { display: flex; flex-direction: column; gap: 12px; }
+.value-item { display: flex; gap: 14px; align-items: flex-start; padding: 18px; background: var(--card); border: 1px solid var(--border2); border-radius: var(--radius); }
+.vi-icon { font-size: 20px; flex-shrink: 0; }
+.vi-title { font-family: var(--font-head); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.vi-text { font-size: 13px; color: var(--text2); font-weight: 300; line-height: 1.5; }
+
+.faq-list { display: flex; flex-direction: column; gap: 2px; }
+.faq-item { border: 1px solid var(--border2); border-radius: var(--radius); overflow: hidden; }
+.faq-q {
+  width: 100%; padding: 20px 24px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--bg3); color: var(--text);
+  font-size: 15px; font-family: var(--font-body); cursor: pointer;
+  border: none; text-align: left; transition: background 0.2s; font-weight: 400;
+}
+.faq-q:hover { background: rgba(255,255,255,0.04); }
+.faq-chevron { color: var(--text3); font-size: 18px; transition: transform 0.3s; flex-shrink: 0; }
+.faq-item.open .faq-chevron { transform: rotate(45deg); color: var(--orange); }
+.faq-a {
+  max-height: 0; overflow: hidden; transition: max-height 0.4s ease;
+  background: rgba(255,255,255,0.01);
+}
+.faq-a-inner { padding: 0 24px 20px; font-size: 14px; color: var(--text2); font-weight: 300; line-height: 1.7; }
+.faq-item.open .faq-a { max-height: 200px; }
+
+/* ── CONTACTO ── */
+#contacto { background: var(--bg2); }
+
+.contact-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 60px; align-items: start; }
+.contact-info h3 { font-family: var(--font-head); font-size: 24px; font-weight: 700; margin-bottom: 16px; }
+.contact-info p { font-size: 15px; color: var(--text2); font-weight: 300; line-height: 1.7; margin-bottom: 32px; }
+.contact-channels { display: flex; flex-direction: column; gap: 12px; }
+.channel { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--text2); }
+.ch-icon { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 16px; background: var(--orange-glow2); }
+
+.contact-form { background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 36px; }
+.cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.cf-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.cf-group.full { grid-column: 1 / -1; }
+.cf-label { font-size: 12px; color: var(--text3); letter-spacing: 0.04em; }
+.cf-input, .cf-select, .cf-textarea {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text);
+  padding: 12px 14px; font-size: 14px; font-family: var(--font-body);
+  transition: border-color 0.2s; width: 100%;
+}
+.cf-input:focus, .cf-select:focus, .cf-textarea:focus { outline: none; border-color: rgba(255,107,43,0.35); }
+.cf-input::placeholder, .cf-textarea::placeholder { color: var(--text3); }
+.cf-select { appearance: none; cursor: pointer; }
+.cf-textarea { min-height: 100px; resize: vertical; }
+.cf-submit {
+  width: 100%; background: var(--orange); color: #fff;
+  padding: 14px; border-radius: var(--radius); border: none;
+  font-size: 15px; font-weight: 500; cursor: pointer; font-family: var(--font-body);
+  transition: opacity 0.2s; margin-top: 4px;
+}
+.cf-submit:hover { opacity: 0.85; }
+.cf-success { display: none; text-align: center; padding: 20px; color: var(--orange); font-size: 15px; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--bg); border-top: 1px solid var(--border2);
+  padding: 60px 5% 32px;
+}
+.footer-inner { max-width: 1200px; margin: 0 auto; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
+.footer-brand p { font-size: 14px; color: var(--text3); margin-top: 12px; font-weight: 300; line-height: 1.7; max-width: 240px; }
+.footer-col h4 { font-family: var(--font-head); font-size: 13px; font-weight: 700; margin-bottom: 16px; letter-spacing: 0.04em; }
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.footer-col ul li a { font-size: 14px; color: var(--text3); text-decoration: none; transition: color 0.2s; font-weight: 300; }
+.footer-col ul li a:hover { color: var(--text2); }
+.footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 24px; border-top: 1px solid var(--border2); font-size: 13px; color: var(--text3); }
+.footer-green { color: var(--orange); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+  .about-grid, .contact-grid { grid-template-columns: 1fr; gap: 32px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .dash-two-col { grid-template-columns: 1fr; }
+  .budget-grid { grid-template-columns: 1fr; }
+  .cf-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .footer-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a href="javascript:void(0)" onclick="scrollTo_('inicio')" class="nav-logo">BROTE<span>.</span></a>
+  <ul class="nav-links">
+    <li><a href="javascript:void(0)" onclick="scrollTo_('inicio')">Inicio</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollTo_('como-funciona')">Cómo funciona</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollTo_('evaluador')">Evaluador</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollTo_('precios')">Precios</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollTo_('sobre-nosotros')">Nosotros</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollTo_('contacto')">Contacto</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollTo_('evaluador')" class="nav-cta">Probar gratis</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Abrir menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <a href="javascript:void(0)" onclick="scrollTo_('inicio');closeMobile()">Inicio</a>
+  <a href="javascript:void(0)" onclick="scrollTo_('como-funciona');closeMobile()">Cómo funciona</a>
+  <a href="javascript:void(0)" onclick="scrollTo_('evaluador');closeMobile()">Evaluador</a>
+  <a href="javascript:void(0)" onclick="scrollTo_('precios');closeMobile()">Precios</a>
+  <a href="javascript:void(0)" onclick="scrollTo_('sobre-nosotros');closeMobile()">Nosotros</a>
+  <a href="javascript:void(0)" onclick="scrollTo_('contacto');closeMobile()">Contacto</a>
+</div>
+
+<!-- ══ HERO ══ -->
+<section id="inicio">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-badge">IA para emprendedores chilenos</div>
+  <h1 class="hero-h1">
+    Tu idea<br>
+    <span class="green">merece</span><br>
+    <span class="outline">brotar.</span>
+  </h1>
+  <p class="hero-sub">Evalúa el potencial de tu idea de negocio con inteligencia artificial. Descubre su originalidad, escalabilidad y el presupuesto que necesitas.</p>
+  <div class="hero-btns">
+    <a href="javascript:void(0)" onclick="scrollTo_('evaluador')" class="btn-primary" style="background:var(--orange);color:#fff;">Evaluar mi idea →</a>
+    <a href="javascript:void(0)" onclick="scrollTo_('como-funciona')" class="btn-outline">Ver cómo funciona</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">98%</div><div class="stat-label">Precisión IA</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">Dimensiones</div></div>
+    <div class="stat"><div class="stat-num">30s</div><div class="stat-label">Por evaluación</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Gratis para empezar</div></div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══ CÓMO FUNCIONA ══ -->
+<section id="como-funciona">
+  <div class="section-wrap">
+    <div class="section-tag">Proceso</div>
+    <h2 class="section-title">Simple, rápido<br>y revelador.</h2>
+    <p class="section-sub">En menos de un minuto obtendrás un análisis completo que normalmente cuesta horas de investigación.</p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon">💡</div>
+        <h3>Describe tu idea</h3>
+        <p>Escribe tu concepto en lenguaje natural. Sin tecnicismos ni formatos rígidos. Solo tu visión.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon">🧠</div>
+        <h3>La IA la analiza</h3>
+        <p>Nuestro motor evalúa innovación, mercado, competencia, viabilidad técnica y escalabilidad global.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon">📊</div>
+        <h3>Dashboard completo</h3>
+        <p>Recibe puntajes, presupuesto estimado, competidores detectados y recomendaciones concretas.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <div class="step-icon">🚀</div>
+        <h3>Itera y mejora</h3>
+        <p>Refina tu idea con orientación personalizada hasta que esté lista para enfrentar el mercado.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══ EVALUADOR ══ -->
+<section id="evaluador">
+  <div class="section-wrap">
+    <div class="section-tag">Herramienta</div>
+    <h2 class="section-title">Evalúa tu idea<br><span style="color:var(--orange)">ahora mismo.</span></h2>
+    <p class="section-sub">Describe tu proyecto o negocio y obtén un análisis completo impulsado por inteligencia artificial.</p>
+
+    <div class="eval-container">
+      <div class="eval-header">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <h3 style="margin-left:8px">Evaluador BROTE</h3>
+        <span>powered by Claude AI</span>
+      </div>
+      <div class="eval-body">
+        <div class="eval-label">Describe tu idea con el mayor detalle posible</div>
+        <textarea class="eval-textarea" id="idea-input" placeholder="Ej: Una app móvil que conecta agricultores del sur de Chile con restaurantes de Santiago para comercializar productos directamente, eliminando intermediarios y usando geolocalización para el delivery..."></textarea>
+        <div class="eval-error" id="eval-error"></div>
+        <button class="eval-btn" id="eval-btn" onclick="runEval()">
+          <div class="spinner"></div>
+          <span class="btn-txt">✦ Evaluar mi idea</span>
+        </button>
+      </div>
+
+      <div class="eval-dashboard" id="eval-dashboard">
+        <div class="dash-scores" id="dash-scores"></div>
+        <div class="verdict-panel" id="verdict-panel"></div>
+        <div class="budget-grid" id="budget-grid"></div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:12px;font-weight:500;">Competencia detectada</div>
+        <div class="comp-list" id="comp-list"></div>
+        <div class="dash-two-col">
+          <div class="dash-panel">
+            <div class="dp-title">Fortalezas</div>
+            <div class="pill-wrap" id="strengths"></div>
+          </div>
+          <div class="dash-panel">
+            <div class="dp-title">Riesgos</div>
+            <div class="pill-wrap" id="risks"></div>
+          </div>
+        </div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:12px;font-weight:500;">Recomendaciones para mejorar</div>
+        <div class="tips-list" id="tips-list"></div>
+        <button class="improve-btn" onclick="askDeep()">💬 Orientación personalizada →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══ PRECIOS ══ -->
+<section id="precios">
+  <div class="section-wrap">
+    <div class="section-tag">Planes</div>
+    <h2 class="section-title">Empieza gratis,<br>crece cuando quieras.</h2>
+    <p class="section-sub">Sin tarjeta de crédito para comenzar. Cancela cuando quieras.</p>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="pc-plan">Semilla</div>
+        <div class="pc-price">$0<span>/mes</span></div>
+        <div class="pc-desc">Para explorar y validar tu primera idea.</div>
+        <ul class="pc-features">
+          <li>3 evaluaciones al mes</li>
+          <li>Dashboard básico</li>
+          <li>Análisis de competencia</li>
+          <li class="off">Orientación personalizada</li>
+          <li class="off">Historial de ideas</li>
+          <li class="off">Exportar informe PDF</li>
+        </ul>
+        <a href="javascript:void(0)" onclick="scrollTo_('evaluador')" class="btn-outline" style="display:block;text-align:center;text-decoration:none;padding:12px;">Empezar gratis</a>
+      </div>
+      <div class="price-card featured">
+        <div class="featured-badge">Más popular</div>
+        <div class="pc-plan">Brote</div>
+        <div class="pc-price">$9.990<span>/mes</span></div>
+        <div class="pc-desc">Para emprendedores que iteran y mejoran.</div>
+        <ul class="pc-features">
+          <li>Evaluaciones ilimitadas</li>
+          <li>Dashboard completo</li>
+          <li>Análisis de competencia profundo</li>
+          <li>Orientación personalizada IA</li>
+          <li>Historial de todas tus ideas</li>
+          <li class="off">Exportar informe PDF</li>
+        </ul>
+        <a href="javascript:void(0)" onclick="scrollTo_('contacto')" class="btn-primary" style="display:block;text-align:center;text-decoration:none;padding:12px;">Comenzar prueba</a>
+      </div>
+      <div class="price-card">
+        <div class="pc-plan">Florece</div>
+        <div class="pc-price">$24.990<span>/mes</span></div>
+        <div class="pc-desc">Para equipos y aceleradoras de startups.</div>
+        <ul class="pc-features">
+          <li>Todo de Brote</li>
+          <li>Hasta 5 usuarios</li>
+          <li>Exportar informes PDF</li>
+          <li>Comparador de ideas</li>
+          <li>Soporte prioritario</li>
+          <li>API access</li>
+        </ul>
+        <a href="javascript:void(0)" onclick="scrollTo_('contacto')" class="btn-outline" style="display:block;text-align:center;text-decoration:none;padding:12px;">Contactar ventas</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══ SOBRE NOSOTROS + FAQ ══ -->
+<section id="sobre-nosotros">
+  <div class="section-wrap">
+    <div class="section-tag">Nosotros</div>
+    <h2 class="section-title">Nacimos en Chile<br>para el mundo.</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>BROTE nació en Arica, Chile, con una convicción simple: las mejores ideas no siempre llegan con el mejor análisis. Constanza Ledesma fundó esta plataforma para que emprendedores con visión no pierdan tiempo ni dinero por falta de validación temprana.</p>
+        <p>Combinamos inteligencia artificial de última generación con el conocimiento del ecosistema latinoamericano para que cualquier persona pueda evaluar su idea con la misma rigurosidad que una aceleradora de Silicon Valley — sin importar si estás en Arica, Santiago o la Patagonia.</p>
+        <p style="color:var(--orange);font-weight:500;">Hecho en Arica. Pensado para el mundo.</p>
+      </div>
+      <div class="about-values">
+        <div class="value-item">
+          <div class="vi-icon">🌱</div>
+          <div><div class="vi-title">Democratizamos el emprendimiento</div><div class="vi-text">Herramientas de análisis avanzado al alcance de todos, sin necesitar MBA ni inversores.</div></div>
+        </div>
+        <div class="value-item">
+          <div class="vi-icon">⚡</div>
+          <div><div class="vi-title">Velocidad con profundidad</div><div class="vi-text">30 segundos para un análisis que tomaría días de investigación manual.</div></div>
+        </div>
+        <div class="value-item">
+          <div class="vi-icon">🔒</div>
+          <div><div class="vi-title">Tus ideas son tuyas</div><div class="vi-text">Privacidad total. No almacenamos ni compartimos tus conceptos con terceros.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-tag" style="margin-top:24px">Preguntas frecuentes</div>
+    <h3 class="section-title" style="font-size:clamp(24px,3vw,36px);margin-bottom:32px">¿Tienes dudas?</h3>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo funciona la evaluación con IA? <span class="faq-chevron">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Usamos Claude, uno de los modelos de IA más avanzados del mundo, entrenado para analizar ideas de negocio en múltiples dimensiones: innovación, escalabilidad, viabilidad técnica, potencial de mercado y originalidad. El modelo también detecta competidores y estima presupuestos reales basados en miles de casos de startups.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">¿Mi idea queda guardada o la pueden ver? <span class="faq-chevron">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">No. Las evaluaciones se procesan en tiempo real y no almacenamos el contenido de tus ideas en nuestra base de datos. Tu privacidad es una prioridad absoluta para nosotros.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">¿Qué tan preciso es el análisis? <span class="faq-chevron">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">La IA tiene un alto nivel de precisión para identificar tendencias, competidores y estimar presupuestos basándose en datos de mercado actualizados. Sin embargo, recomendamos usarla como una primera validación rápida, complementada con investigación propia y feedback de usuarios reales.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">¿Puedo evaluar cualquier tipo de idea? <span class="faq-chevron">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Sí. BROTE evalúa ideas de startups tecnológicas, negocios tradicionales, proyectos sociales, aplicaciones móviles, servicios B2B, e-commerce y mucho más. Mientras más detalle incluyas en la descripción, más preciso será el análisis.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">¿Los precios están en pesos chilenos? <span class="faq-chevron">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Sí, los precios de los planes están expresados en pesos chilenos (CLP). Aceptamos tarjetas de crédito y débito nacionales e internacionales, y también Webpay.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══ CONTACTO ══ -->
+<section id="contacto">
+  <div class="section-wrap">
+    <div class="section-tag">Contacto</div>
+    <h2 class="section-title">Hablemos.</h2>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h3>¿Tienes preguntas<br>o una idea para BROTE?</h3>
+        <p>Estamos siempre disponibles para responder dudas, recibir feedback o explorar colaboraciones. Somos un equipo pequeño y nos tomamos en serio cada mensaje.</p>
+        <div class="contact-channels">
+          <div class="channel"><div class="ch-icon">📧</div>hola@brote.cl</div>
+          <div class="channel"><div class="ch-icon">📍</div>Camilo Henríquez 2133, Arica, Chile</div>
+          <div class="channel"><div class="ch-icon">🕐</div>Respuesta en menos de 24 hrs</div>
+        </div>
+      </div>
+      <div class="contact-form" id="contact-form-wrap">
+        <div class="cf-row">
+          <div class="cf-group"><label class="cf-label">Nombre</label><input class="cf-input" id="cf-nombre" placeholder="Tu nombre" /></div>
+          <div class="cf-group"><label class="cf-label">Email</label><input class="cf-input" id="cf-email" placeholder="tu@email.com" /></div>
+        </div>
+        <div class="cf-group">
+          <label class="cf-label">Asunto</label>
+          <select class="cf-select" id="cf-asunto">
+            <option value="">Selecciona un asunto</option>
+            <option>Consulta sobre planes</option>
+            <option>Soporte técnico</option>
+            <option>Colaboración o prensa</option>
+            <option>Feedback del producto</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="cf-group">
+          <label class="cf-label">Mensaje</label>
+          <textarea class="cf-textarea" id="cf-mensaje" placeholder="Cuéntanos en qué podemos ayudarte..."></textarea>
+        </div>
+        <button class="cf-submit" onclick="submitContact()">Enviar mensaje</button>
+        <div class="cf-success" id="cf-success">✦ Mensaje enviado. Te responderemos pronto.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="nav-logo" style="font-size:20px">BROTE<span style="color:var(--text)">.</span></div>
+        <p>Evalúa y desarrolla tus ideas de negocio con inteligencia artificial. Hecho en Chile para el mundo.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Producto</h4>
+        <ul>
+          <li><a href="javascript:void(0)" onclick="scrollTo_('como-funciona')">Cómo funciona</a></li>
+          <li><a href="javascript:void(0)" onclick="scrollTo_('evaluador')">Evaluador</a></li>
+          <li><a href="javascript:void(0)" onclick="scrollTo_('precios')">Precios</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Empresa</h4>
+        <ul>
+          <li><a href="javascript:void(0)" onclick="scrollTo_('sobre-nosotros')">Nosotros</a></li>
+          <li><a href="javascript:void(0)" onclick="scrollTo_('contacto')">Contacto</a></li>
+          <li><a href="javascript:void(0)">Blog</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="javascript:void(0)">Privacidad</a></li>
+          <li><a href="javascript:void(0)">Términos de uso</a></li>
+          <li><a href="javascript:void(0)">Cookies</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 <span class="footer-green">BROTE</span>. Todos los derechos reservados.</span>
+      <span>Hecho con 🌱 en Arica por Constanza Ledesma</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── SMOOTH SCROLL HELPER ──
+function scrollTo_(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── NAVBAR SCROLL ──
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// ── HAMBURGER ──
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('mobile-menu').classList.toggle('open');
+});
+function closeMobile() { document.getElementById('mobile-menu').classList.remove('open'); }
+
+// ── FAQ ──
+function toggleFaq(btn) {
+  const item = btn.parentElement;
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+// ── CONTACT FORM ──
+function submitContact() {
+  const n = document.getElementById('cf-nombre').value;
+  const e = document.getElementById('cf-email').value;
+  if (!n || !e) { alert('Por favor completa nombre y email.'); return; }
+  document.getElementById('contact-form-wrap').querySelector('.cf-submit').style.display = 'none';
+  document.getElementById('cf-success').style.display = 'block';
+}
+
+// ── EVALUADOR ──
+let currentIdea = '';
+
+async function runEval() {
+  const idea = document.getElementById('idea-input').value.trim();
+  if (!idea || idea.length < 20) {
+    const err = document.getElementById('eval-error');
+    err.textContent = 'Por favor describe tu idea con más detalle.';
+    err.style.display = 'block';
+    return;
+  }
+  document.getElementById('eval-error').style.display = 'none';
+  currentIdea = idea;
+  const btn = document.getElementById('eval-btn');
+  btn.disabled = true; btn.classList.add('loading');
+  document.getElementById('eval-dashboard').classList.remove('visible');
+
+  const prompt = `Eres un experto en análisis de startups e innovación. Evalúa esta idea:
+
+"${idea}"
+
+Responde SOLO con JSON válido, sin backticks ni texto extra:
+{
+  "puntajes": { "innovacion": <0-100>, "escalabilidad": <0-100>, "mercado": <0-100>, "originalidad": <0-100>, "viabilidad": <0-100> },
+  "puntaje_global": <0-100>,
+  "veredicto_emoji": "<emoji>",
+  "veredicto_titulo": "<título corto>",
+  "veredicto_texto": "<2-3 oraciones>",
+  "presupuesto": { "mvp": "<rango USD>", "lanzamiento": "<rango USD>", "escala": "<rango USD>" },
+  "competencia": [{ "nombre": "<nombre>", "descripcion": "<1 frase>", "tipo": "directa|indirecta|ninguna" }],
+  "fortalezas": ["<f1>","<f2>","<f3>"],
+  "riesgos": ["<r1>","<r2>","<r3>"],
+  "recomendaciones": ["<rec1>","<rec2>","<rec3>"]
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    const text = data.content.map(i => i.text || '').join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    const r = JSON.parse(clean);
+    renderDash(r);
+  } catch(e) {
+    const err = document.getElementById('eval-error');
+    err.textContent = 'Error al evaluar. Por favor intenta de nuevo.';
+    err.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.classList.remove('loading');
+  }
+}
+
+function renderDash(r) {
+  const labels = { innovacion:'Innovación', escalabilidad:'Escalabilidad', mercado:'Mercado', originalidad:'Originalidad', viabilidad:'Viabilidad' };
+  const colors = { innovacion:'#FF6B2B', escalabilidad:'#FF6B2B', mercado:'#ffb43c', originalidad:'#bf5fff', viabilidad:'#3de0ff' };
+
+  const scores = document.getElementById('dash-scores');
+  scores.innerHTML = '';
+  Object.entries(r.puntajes).forEach(([k, v]) => {
+    scores.innerHTML += `<div class="dash-score-card"><div class="dsc-label">${labels[k]}</div><div class="dsc-val" style="color:${colors[k]}">${Math.round(v)}</div><div class="dsc-bar-bg"><div class="dsc-bar" style="width:0%;background:${colors[k]}" data-w="${Math.round(v)}"></div></div></div>`;
+  });
+  scores.innerHTML += `<div class="dash-score-card" style="border-color:rgba(255,107,43,0.25)"><div class="dsc-label">Global</div><div class="dsc-val" style="color:var(--orange)">${Math.round(r.puntaje_global)}</div><div class="dsc-bar-bg"><div class="dsc-bar" style="width:0%;background:var(--orange)" data-w="${Math.round(r.puntaje_global)}"></div></div></div>`;
+
+  document.getElementById('verdict-panel').innerHTML = `<div class="v-emoji">${r.veredicto_emoji}</div><div><div class="v-title">${r.veredicto_titulo}</div><div class="v-text">${r.veredicto_texto}</div></div>`;
+
+  document.getElementById('budget-grid').innerHTML = `
+    <div class="bg-card"><div class="bg-label">MVP</div><div class="bg-val">${r.presupuesto.mvp}</div></div>
+    <div class="bg-card"><div class="bg-label">Lanzamiento</div><div class="bg-val">${r.presupuesto.lanzamiento}</div></div>
+    <div class="bg-card"><div class="bg-label">Escalar</div><div class="bg-val">${r.presupuesto.escala}</div></div>`;
+
+  const cl = document.getElementById('comp-list');
+  cl.innerHTML = '';
+  (r.competencia||[]).slice(0,4).forEach(c => {
+    const cls = c.tipo==='directa'?'comp-direct':c.tipo==='indirecta'?'comp-indirect':'comp-none';
+    const lbl = c.tipo==='directa'?'Directa':c.tipo==='indirecta'?'Indirecta':'Sin rival';
+    cl.innerHTML += `<div class="comp-item"><div><div class="comp-name">${c.nombre}</div><div class="comp-desc">${c.descripcion}</div></div><span class="comp-tag ${cls}">${lbl}</span></div>`;
+  });
+
+  document.getElementById('strengths').innerHTML = (r.fortalezas||[]).map(f=>`<span class="pill pill-g">✓ ${f}</span>`).join('');
+  document.getElementById('risks').innerHTML = (r.riesgos||[]).map(f=>`<span class="pill pill-r">⚠ ${f}</span>`).join('');
+
+  const tl = document.getElementById('tips-list');
+  tl.innerHTML = (r.recomendaciones||[]).map((t,i)=>`<div class="tip-item"><span class="tip-n">0${i+1}</span><span>${t}</span></div>`).join('');
+
+  const dash = document.getElementById('eval-dashboard');
+  dash.classList.add('visible');
+
+  setTimeout(() => {
+    dash.querySelectorAll('.dsc-bar').forEach(b => { b.style.width = b.dataset.w + '%'; });
+    dash.scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 100);
+}
+
+function askDeep() {
+  alert('Esta función abre el chat de orientación personalizada con la IA. Disponible en el plan Brote.');
+}
+</script>
+</body>
+</html>
