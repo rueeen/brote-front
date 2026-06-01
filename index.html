@@ -1001,6 +1001,7 @@ footer {
         <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:12px;font-weight:500;">Recomendaciones para mejorar</div>
         <div class="tips-list" id="tips-list"></div>
         <button class="improve-btn" onclick="askDeep()">💬 Orientación personalizada →</button>
+        <button class="improve-btn" type="button" onclick="resetForm()">🌱 Evaluar otra idea</button>
       </div>
     </div>
   </div>
@@ -1238,58 +1239,167 @@ function submitContact() {
 }
 
 // ── EVALUADOR ──
+const API_BASE = window.API_BASE || '';
 let currentIdea = '';
+let currentStep = 1;
+let formData = {
+  rubro: '',
+  ciudad: '',
+  publico: '',
+  descripcion: '',
+  presupuesto_disponible: ''
+};
+
+function showEvalError(message) {
+  const err = document.getElementById('eval-error');
+  err.textContent = message;
+  err.style.display = 'block';
+}
+
+function clearEvalError() {
+  const err = document.getElementById('eval-error');
+  err.textContent = '';
+  err.style.display = 'none';
+}
+
+function syncFormData() {
+  const rubro = document.querySelector('input[name="rubro"]:checked');
+  formData = {
+    rubro: rubro ? rubro.value : '',
+    ciudad: document.getElementById('ciudad').value.trim(),
+    publico: document.getElementById('publico').value.trim(),
+    descripcion: document.getElementById('descripcion').value.trim(),
+    presupuesto_disponible: document.getElementById('presupuesto_disponible').value.trim()
+  };
+}
+
+function updateReview() {
+  syncFormData();
+  document.getElementById('review-rubro').textContent = formData.rubro || '—';
+  document.getElementById('review-ciudad').textContent = formData.ciudad || '—';
+  document.getElementById('review-publico').textContent = formData.publico || '—';
+  document.getElementById('review-descripcion').textContent = formData.descripcion || '—';
+  document.getElementById('review-presupuesto').textContent = formData.presupuesto_disponible || 'Sin presupuesto definido';
+}
+
+function goToStep(step) {
+  currentStep = step;
+  document.querySelectorAll('.form-step').forEach(el => {
+    el.style.display = el.dataset.step === String(step) ? '' : 'none';
+  });
+  document.querySelectorAll('.progress-step').forEach(el => {
+    el.classList.toggle('active', Number(el.dataset.step) <= step);
+  });
+  if (step === 4) updateReview();
+}
+
+function validateStep(step) {
+  syncFormData();
+  if (step === 1 && !formData.rubro) return 'Selecciona un rubro para continuar.';
+  if (step === 2 && (!formData.ciudad || !formData.publico)) return 'Completa ciudad y público objetivo para continuar.';
+  if (step === 3 && !formData.descripcion) return 'Describe tu idea antes de continuar.';
+  if (step === 3 && (formData.descripcion.length < 30 || formData.descripcion.split(/\s+/).filter(Boolean).length < 5)) {
+    return 'La descripción debe tener al menos 30 caracteres y 5 palabras.';
+  }
+  return '';
+}
+
+document.querySelectorAll('.form-next').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const error = validateStep(currentStep);
+    if (error) { showEvalError(error); return; }
+    clearEvalError();
+    goToStep(Number(btn.dataset.next));
+  });
+});
+
+document.querySelectorAll('.form-back').forEach(btn => {
+  btn.addEventListener('click', () => {
+    clearEvalError();
+    goToStep(Number(btn.dataset.prev));
+  });
+});
+
+document.getElementById('eval-form').addEventListener('input', () => {
+  syncFormData();
+  if (currentStep === 4) updateReview();
+});
+
+document.getElementById('eval-form').addEventListener('change', () => {
+  syncFormData();
+  if (currentStep === 4) updateReview();
+});
 
 async function runEval() {
-  const idea = document.getElementById('idea-input').value.trim();
-  if (!idea || idea.length < 20) {
-    const err = document.getElementById('eval-error');
-    err.textContent = 'Por favor describe tu idea con más detalle.';
-    err.style.display = 'block';
+  syncFormData();
+
+  if (!formData.rubro || !formData.ciudad || !formData.publico || !formData.descripcion) {
+    showEvalError('Completa rubro, ciudad, público objetivo y descripción antes de evaluar.');
     return;
   }
-  document.getElementById('eval-error').style.display = 'none';
-  currentIdea = idea;
+
+  clearEvalError();
+  currentIdea = formData.descripcion;
+
   const btn = document.getElementById('eval-btn');
-  btn.disabled = true; btn.classList.add('loading');
+  btn.disabled = true;
+  btn.classList.add('loading');
   document.getElementById('eval-dashboard').classList.remove('visible');
 
-  const prompt = `Eres un experto en análisis de startups e innovación. Evalúa esta idea:
-
-"${idea}"
-
-Responde SOLO con JSON válido, sin backticks ni texto extra:
-{
-  "puntajes": { "innovacion": <0-100>, "escalabilidad": <0-100>, "mercado": <0-100>, "originalidad": <0-100>, "viabilidad": <0-100> },
-  "puntaje_global": <0-100>,
-  "veredicto_emoji": "<emoji>",
-  "veredicto_titulo": "<título corto>",
-  "veredicto_texto": "<2-3 oraciones>",
-  "presupuesto": { "mvp": "<rango USD>", "lanzamiento": "<rango USD>", "escala": "<rango USD>" },
-  "competencia": [{ "nombre": "<nombre>", "descripcion": "<1 frase>", "tipo": "directa|indirecta|ninguna" }],
-  "fortalezas": ["<f1>","<f2>","<f3>"],
-  "riesgos": ["<r1>","<r2>","<r3>"],
-  "recomendaciones": ["<rec1>","<rec2>","<rec3>"]
-}`;
+  const body = {
+    rubro: formData.rubro,
+    publico: formData.publico,
+    descripcion: formData.descripcion,
+    ciudad: formData.ciudad,
+    presupuesto_disponible: formData.presupuesto_disponible
+  };
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(`${API_BASE}/evaluar/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify(body)
     });
-    const data = await res.json();
-    const text = data.content.map(i => i.text || '').join('');
-    const clean = text.replace(/```json|```/g, '').trim();
-    const r = JSON.parse(clean);
-    renderDash(r);
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      const fallback = {
+        400: 'Revisa los datos ingresados e intenta nuevamente.',
+        429: 'Demasiadas evaluaciones por ahora. Espera un momento e intenta nuevamente.',
+        502: 'El servicio de evaluación no respondió correctamente. Intenta nuevamente en unos minutos.'
+      };
+      throw new Error(data.detail || data.error || fallback[res.status] || 'Error al evaluar. Por favor intenta de nuevo.');
+    }
+
+    if (!data.resultado) throw new Error('La respuesta del evaluador no incluyó un resultado.');
+
+    renderDash(data.resultado);
+    document.querySelector('.eval-body').style.display = 'none';
   } catch(e) {
-    const err = document.getElementById('eval-error');
-    err.textContent = 'Error al evaluar. Por favor intenta de nuevo.';
-    err.style.display = 'block';
+    showEvalError(e.message || 'Error al evaluar. Por favor intenta de nuevo.');
   } finally {
-    btn.disabled = false; btn.classList.remove('loading');
+    btn.disabled = false;
+    btn.classList.remove('loading');
   }
+}
+
+function resetForm() {
+  formData = {
+    rubro: '',
+    ciudad: '',
+    publico: '',
+    descripcion: '',
+    presupuesto_disponible: ''
+  };
+  currentIdea = '';
+  document.getElementById('eval-form').reset();
+  clearEvalError();
+  document.querySelector('.eval-body').style.display = '';
+  document.getElementById('eval-dashboard').classList.remove('visible');
+  updateReview();
+  goToStep(1);
+  scrollTo_('evaluador');
 }
 
 function renderDash(r) {
