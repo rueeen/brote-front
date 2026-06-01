@@ -1,3 +1,5 @@
+const API_BASE = 'http://localhost:8000/api';
+
 // ── SMOOTH SCROLL HELPER ──
 function scrollTo_(id) {
   const el = document.getElementById(id);
@@ -227,50 +229,53 @@ async function runEval() {
   clearEvalError();
 
   const formData = new FormData(evalForm);
-  const idea = [
-    `Rubro: ${rubroLabels[formData.get('rubro')] || formData.get('rubro')}`,
-    `Ciudad: ${formData.get('ciudad')}`,
-    `Público objetivo: ${formData.get('publico')}`,
-    `Descripción: ${formData.get('descripcion')}`,
-    `Presupuesto disponible: ${formData.get('presupuesto_disponible') || 'Sin definir'}`
-  ].join('\n');
+  const rubroSlugs = {
+    tecnologia: 'tecnologia',
+    tecnología: 'tecnologia',
+    gastronomia: 'gastronomia',
+    gastronomía: 'gastronomia',
+    retail: 'retail',
+    salud: 'salud',
+    educacion: 'educacion',
+    educación: 'educacion',
+    servicios: 'servicios',
+    sustentabilidad: 'sustentabilidad',
+    otro: 'otro'
+  };
+  const rubroRaw = (formData.get('rubro') || '').toString().trim().toLowerCase();
+  const payload = {
+    rubro: rubroSlugs[rubroRaw] || rubroRaw.normalize('NFD').replace(/[\u0300-\u036f]/g, ''),
+    publico: (formData.get('publico') || '').toString().trim(),
+    descripcion: (formData.get('descripcion') || '').toString().trim(),
+    ciudad: (formData.get('ciudad') || '').toString().trim(),
+    presupuesto_disponible: (formData.get('presupuesto_disponible') || '').toString().trim()
+  };
 
-  currentIdea = idea;
   const btn = document.getElementById('eval-btn');
   btn.disabled = true; btn.classList.add('loading');
   document.getElementById('eval-dashboard').classList.remove('visible');
 
-  const prompt = `Eres un experto en análisis de startups e innovación. Evalúa esta idea:
-
-"${idea}"
-
-Responde SOLO con JSON válido, sin backticks ni texto extra:
-{
-  "puntajes": { "innovacion": <0-100>, "escalabilidad": <0-100>, "mercado": <0-100>, "originalidad": <0-100>, "viabilidad": <0-100> },
-  "puntaje_global": <0-100>,
-  "veredicto_emoji": "<emoji>",
-  "veredicto_titulo": "<título corto>",
-  "veredicto_texto": "<2-3 oraciones>",
-  "presupuesto": { "mvp": "<rango USD>", "lanzamiento": "<rango USD>", "escala": "<rango USD>" },
-  "competencia": [{ "nombre": "<nombre>", "descripcion": "<1 frase>", "tipo": "directa|indirecta|ninguna" }],
-  "fortalezas": ["<f1>","<f2>","<f3>"],
-  "riesgos": ["<r1>","<r2>","<r3>"],
-  "recomendaciones": ["<rec1>","<rec2>","<rec3>"]
-}`;
-
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(`${API_BASE}/evaluar/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify(payload)
     });
+
+    if (!res.ok) {
+      const messagesByStatus = {
+        400: 'Revisa los datos del formulario',
+        429: 'Alcanzaste el límite de evaluaciones por hora',
+        502: 'La IA no pudo procesar tu idea, intenta de nuevo'
+      };
+      showEvalError(messagesByStatus[res.status] || 'Error al evaluar. Por favor intenta de nuevo.');
+      return;
+    }
+
     const data = await res.json();
-    const text = data.content.map(i => i.text || '').join('');
-    const clean = text.replace(/```json|```/g, '').trim();
-    const r = JSON.parse(clean);
-    renderDash(r);
+    renderDash(data.resultado);
   } catch(e) {
-    showEvalError('Error al evaluar. Por favor intenta de nuevo.');
+    showEvalError('No se pudo conectar con el servidor. ¿Está corriendo el backend?');
   } finally {
     btn.disabled = false; btn.classList.remove('loading');
   }
