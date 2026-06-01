@@ -323,6 +323,213 @@ section { position: relative; z-index: 1; }
 
 .eval-error { color: #ff6b6b; font-size: 13px; margin-top: 8px; display: none; }
 
+
+.eval-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text3);
+  font-size: 12px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.progress-step span {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border2);
+  border-radius: 50%;
+  background: rgba(255,255,255,0.03);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 800;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.progress-step small {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.progress-step.active { color: var(--orange); }
+.progress-step.active span {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+  box-shadow: 0 0 0 5px var(--orange-glow2);
+}
+.progress-line {
+  height: 1px;
+  flex: 1;
+  min-width: 18px;
+  background: var(--border2);
+}
+
+.eval-form { width: 100%; }
+.form-step { animation: fadeUp 0.35s ease; }
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.form-field { margin-bottom: 16px; }
+.eval-label span, .field-hint { color: var(--text3); }
+.field-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 300;
+}
+.eval-description { min-height: 140px; }
+
+.rubro-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.rubro-card {
+  position: relative;
+  min-height: 118px;
+  padding: 18px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.rubro-card:hover {
+  background: rgba(255,107,43,0.06);
+  border-color: rgba(255,107,43,0.22);
+  transform: translateY(-1px);
+}
+.rubro-card input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.rubro-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius);
+  background: var(--orange-glow2);
+  border: 1px solid var(--border2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.rubro-label {
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 500;
+}
+.rubro-card:has(input:checked) {
+  background: rgba(255,107,43,0.10);
+  border-color: rgba(255,107,43,0.45);
+  box-shadow: 0 0 0 1px rgba(255,107,43,0.10), 0 16px 40px rgba(0,0,0,0.18);
+}
+.rubro-card:has(input:checked) .rubro-icon {
+  background: var(--orange);
+  border-color: var(--orange);
+}
+.rubro-card:has(input:checked) .rubro-label { color: var(--text); }
+
+.form-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+.form-nav .eval-btn { margin-top: 0; }
+.form-next, .form-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s, border-color 0.2s, color 0.2s;
+}
+.form-next {
+  margin-left: auto;
+  background: var(--orange);
+  border: 1px solid var(--orange);
+  color: #fff;
+}
+.form-back {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text2);
+}
+.form-next:hover, .form-back:hover { opacity: 0.85; transform: translateY(-1px); }
+.form-back:hover { border-color: rgba(255,107,43,0.30); color: var(--text); }
+
+.review-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+.review-eyebrow {
+  color: var(--orange);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.review-card h4 {
+  font-family: var(--font-head);
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+.review-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.review-item {
+  background: rgba(8,12,10,0.35);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.review-item-full { grid-column: 1 / -1; }
+.review-item span {
+  display: block;
+  color: var(--text3);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.review-item strong {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
 /* dashboard */
 .eval-dashboard { display: none; padding: 32px; border-top: 1px solid var(--border2); }
 .eval-dashboard.visible { display: block; animation: fadeUp 0.4s ease; }
@@ -502,10 +709,20 @@ footer {
   .dash-two-col { grid-template-columns: 1fr; }
   .budget-grid { grid-template-columns: 1fr; }
   .cf-row { grid-template-columns: 1fr; }
+  .eval-body { padding: 24px; }
+  .eval-progress { align-items: flex-start; gap: 6px; }
+  .progress-step { flex-direction: column; gap: 6px; text-align: center; }
+  .progress-step small { font-size: 9px; }
+  .rubro-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .form-grid, .review-list { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
   .footer-grid { grid-template-columns: 1fr; }
   .pricing-grid { grid-template-columns: 1fr; }
+  .eval-body { padding: 20px; }
+  .rubro-grid { grid-template-columns: 1fr; }
+  .form-nav { flex-direction: column-reverse; align-items: stretch; }
+  .form-next, .form-back, .form-nav .eval-btn { width: 100%; }
 }
 </style>
 </head>
@@ -613,13 +830,156 @@ footer {
         <span>powered by Claude AI</span>
       </div>
       <div class="eval-body">
-        <div class="eval-label">Describe tu idea con el mayor detalle posible</div>
-        <textarea class="eval-textarea" id="idea-input" placeholder="Ej: Una app móvil que conecta agricultores del sur de Chile con restaurantes de Santiago para comercializar productos directamente, eliminando intermediarios y usando geolocalización para el delivery..."></textarea>
+        <div class="eval-progress" aria-label="Progreso del formulario">
+          <div class="progress-step active" data-step="1">
+            <span>1</span>
+            <small>Rubro</small>
+          </div>
+          <div class="progress-line"></div>
+          <div class="progress-step" data-step="2">
+            <span>2</span>
+            <small>Mercado</small>
+          </div>
+          <div class="progress-line"></div>
+          <div class="progress-step" data-step="3">
+            <span>3</span>
+            <small>Idea</small>
+          </div>
+          <div class="progress-line"></div>
+          <div class="progress-step" data-step="4">
+            <span>4</span>
+            <small>Revisión</small>
+          </div>
+        </div>
+
+        <form class="eval-form" id="eval-form">
+          <div class="form-step" data-step="1">
+            <div class="eval-label">Elige el rubro principal de tu idea</div>
+            <div class="rubro-grid" role="radiogroup" aria-label="Rubro de negocio">
+              <label class="rubro-card">
+                <input type="radio" name="rubro" value="tecnologia" required>
+                <span class="rubro-icon">💻</span>
+                <span class="rubro-label">Tecnología</span>
+              </label>
+              <label class="rubro-card">
+                <input type="radio" name="rubro" value="gastronomia">
+                <span class="rubro-icon">🍽️</span>
+                <span class="rubro-label">Gastronomía</span>
+              </label>
+              <label class="rubro-card">
+                <input type="radio" name="rubro" value="retail">
+                <span class="rubro-icon">🛍️</span>
+                <span class="rubro-label">Retail</span>
+              </label>
+              <label class="rubro-card">
+                <input type="radio" name="rubro" value="salud">
+                <span class="rubro-icon">🩺</span>
+                <span class="rubro-label">Salud</span>
+              </label>
+              <label class="rubro-card">
+                <input type="radio" name="rubro" value="educacion">
+                <span class="rubro-icon">🎓</span>
+                <span class="rubro-label">Educación</span>
+              </label>
+              <label class="rubro-card">
+                <input type="radio" name="rubro" value="servicios">
+                <span class="rubro-icon">🤝</span>
+                <span class="rubro-label">Servicios</span>
+              </label>
+              <label class="rubro-card">
+                <input type="radio" name="rubro" value="sustentabilidad">
+                <span class="rubro-icon">🌱</span>
+                <span class="rubro-label">Sustentabilidad</span>
+              </label>
+              <label class="rubro-card">
+                <input type="radio" name="rubro" value="otro">
+                <span class="rubro-icon">✨</span>
+                <span class="rubro-label">Otro</span>
+              </label>
+            </div>
+            <div class="form-nav">
+              <button class="form-next" type="button" data-next="2">Siguiente</button>
+            </div>
+          </div>
+
+          <div class="form-step" data-step="2" style="display:none">
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="eval-label" for="ciudad">¿En qué ciudad operará?</label>
+                <input class="cf-input" id="ciudad" name="ciudad" list="ciudades-sugeridas" placeholder="Ej: Santiago" autocomplete="address-level2" required>
+                <datalist id="ciudades-sugeridas">
+                  <option value="Santiago">
+                  <option value="Arica">
+                  <option value="Valparaíso">
+                  <option value="Concepción">
+                  <option value="Temuco">
+                </datalist>
+              </div>
+              <div class="form-field">
+                <label class="eval-label" for="publico">¿Cuál es tu público objetivo?</label>
+                <input class="cf-input" id="publico" name="publico" placeholder="Ej: Jóvenes 18-30" required>
+              </div>
+            </div>
+            <div class="form-nav">
+              <button class="form-back" type="button" data-prev="1">Atrás</button>
+              <button class="form-next" type="button" data-next="3">Siguiente</button>
+            </div>
+          </div>
+
+          <div class="form-step" data-step="3" style="display:none">
+            <div class="form-field">
+              <label class="eval-label" for="descripcion">Describe tu idea con el mayor detalle posible</label>
+              <textarea class="cf-textarea eval-description" id="descripcion" name="descripcion" minlength="30" placeholder="Ej: Una app móvil que conecta agricultores del sur de Chile con restaurantes de Santiago para comercializar productos directamente..." required></textarea>
+              <div class="field-hint">Mínimo 30 caracteres y 5 palabras.</div>
+            </div>
+            <div class="form-field">
+              <label class="eval-label" for="presupuesto_disponible">Presupuesto disponible <span>(opcional)</span></label>
+              <input class="cf-input" id="presupuesto_disponible" name="presupuesto_disponible" placeholder="Ej: 2000 USD">
+            </div>
+            <div class="form-nav">
+              <button class="form-back" type="button" data-prev="2">Atrás</button>
+              <button class="form-next" type="button" data-next="4">Siguiente</button>
+            </div>
+          </div>
+
+          <div class="form-step" data-step="4" style="display:none">
+            <div class="review-card">
+              <div class="review-eyebrow">Revisa antes de evaluar</div>
+              <h4>Resumen de tu idea</h4>
+              <div class="review-list">
+                <div class="review-item">
+                  <span>Rubro</span>
+                  <strong id="review-rubro">—</strong>
+                </div>
+                <div class="review-item">
+                  <span>Ciudad</span>
+                  <strong id="review-ciudad">—</strong>
+                </div>
+                <div class="review-item">
+                  <span>Público objetivo</span>
+                  <strong id="review-publico">—</strong>
+                </div>
+                <div class="review-item review-item-full">
+                  <span>Descripción</span>
+                  <strong id="review-descripcion">—</strong>
+                </div>
+                <div class="review-item">
+                  <span>Presupuesto disponible</span>
+                  <strong id="review-presupuesto">—</strong>
+                </div>
+              </div>
+            </div>
+            <div class="form-nav">
+              <button class="form-back" type="button" data-prev="3">Atrás</button>
+              <button class="eval-btn" id="eval-btn" type="button" onclick="runEval()">
+                <div class="spinner"></div>
+                <span class="btn-txt">✦ Evaluar mi idea</span>
+              </button>
+            </div>
+          </div>
+        </form>
+
         <div class="eval-error" id="eval-error"></div>
-        <button class="eval-btn" id="eval-btn" onclick="runEval()">
-          <div class="spinner"></div>
-          <span class="btn-txt">✦ Evaluar mi idea</span>
-        </button>
       </div>
 
       <div class="eval-dashboard" id="eval-dashboard">
