@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = window.BROTE_API_BASE || 'http://localhost:8000/api';
 
 // ── SMOOTH SCROLL HELPER ──
 function scrollTo_(id) {
@@ -309,22 +309,9 @@ async function runEval() {
   clearEvalError();
 
   const formData = new FormData(evalForm);
-  const rubroSlugs = {
-    tecnologia: 'tecnologia',
-    tecnología: 'tecnologia',
-    gastronomia: 'gastronomia',
-    gastronomía: 'gastronomia',
-    retail: 'retail',
-    salud: 'salud',
-    educacion: 'educacion',
-    educación: 'educacion',
-    servicios: 'servicios',
-    sustentabilidad: 'sustentabilidad',
-    otro: 'otro'
-  };
-  const rubroRaw = (formData.get('rubro') || '').toString().trim().toLowerCase();
+  const rubro = (formData.get('rubro') || '').toString().trim().toLowerCase();
   const payload = {
-    rubro: rubroSlugs[rubroRaw] || rubroRaw.normalize('NFD').replace(/[\u0300-\u036f]/g, ''),
+    rubro,
     publico: (formData.get('publico') || '').toString().trim(),
     descripcion: (formData.get('descripcion') || '').toString().trim(),
     ciudad: (formData.get('ciudad') || '').toString().trim(),
