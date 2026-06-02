@@ -68,6 +68,24 @@ const evalError = document.getElementById('eval-error');
 const evalLoadingMsg = document.getElementById('eval-loading-msg');
 const descriptionInput = document.getElementById('descripcion');
 const descriptionCounter = document.getElementById('descripcion-counter');
+const evalDashboard = document.getElementById('eval-dashboard');
+const shareLinkInput = document.getElementById('share-link-input');
+const dashboardShare = document.getElementById('dashboard-share');
+const copyLinkBtn = document.getElementById('copy-link-btn');
+const copyLinkStatus = document.getElementById('copy-link-status');
+const dashboardContainerIds = [
+  'dash-scores',
+  'verdict-panel',
+  'budget-grid',
+  'budget-notes',
+  'feasibility-grid',
+  'comp-list',
+  'strengths',
+  'risks',
+  'opportunities',
+  'weaknesses',
+  'tips-list'
+];
 
 document.querySelectorAll('.form-step').forEach(step => {
   step.style.display = step.dataset.step === '1' ? 'block' : 'none';
@@ -320,7 +338,7 @@ async function runEval() {
   btn.disabled = true;
   btn.classList.add('loading');
   startLoadingMessages();
-  document.getElementById('eval-dashboard').classList.remove('visible');
+  evalDashboard.classList.remove('visible');
 
   try {
     const res = await fetch(`${API_BASE}/evaluar/`, {
@@ -353,7 +371,9 @@ async function runEval() {
     }
 
     const data = await res.json();
-    renderDash(data.resultado);
+    const uuid = data?.uuid;
+    if (uuid) pushEvalPermalink(uuid);
+    renderDash(data.resultado, { uuid });
   } catch (error) {
     if (error.name === 'AbortError') {
       showEvalError('La evaluación está tardando más de lo normal. Esto suele suceder cuando el servicio de IA está saturado. Intenta de nuevo en unos minutos.', { showRetry: true });
@@ -374,7 +394,7 @@ async function runEval() {
   }
 }
 
-function renderDash(r) {
+function renderDash(r, { uuid = null, scroll = true } = {}) {
   const escapeHtml = (value = '') => String(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -454,13 +474,28 @@ function renderDash(r) {
   const tl = document.getElementById('tips-list');
   tl.innerHTML = (r.recomendaciones || []).map((t, i) => `<div class="tip-item"><span class="tip-n">${String(i + 1).padStart(2, '0')}</span><span>${escapeHtml(t)}</span></div>`).join('');
 
-  const dash = document.getElementById('eval-dashboard');
-  dash.classList.add('visible');
+  evalDashboard.classList.add('visible');
+  updateShareFooter(uuid);
 
   setTimeout(() => {
-    dash.querySelectorAll('.dsc-bar').forEach(b => { b.style.width = b.dataset.w + '%'; });
-    dash.scrollIntoView({ behavior:'smooth', block:'start' });
+    evalDashboard.querySelectorAll('.dsc-bar').forEach(b => { b.style.width = b.dataset.w + '%'; });
+    if (scroll) evalDashboard.scrollIntoView({ behavior:'smooth', block:'start' });
   }, 100);
+}
+
+function clearDashboardContent() {
+  dashboardContainerIds.forEach(id => {
+    const container = document.getElementById(id);
+    if (container) container.innerHTML = '';
+  });
+  if (dashboardShare) dashboardShare.hidden = true;
+  if (shareLinkInput) shareLinkInput.value = '';
+  if (copyLinkStatus) copyLinkStatus.textContent = '';
+}
+
+function setEvalFormVisible(isVisible) {
+  evalForm.hidden = !isVisible;
+  document.querySelector('.eval-progress')?.toggleAttribute('hidden', !isVisible);
 }
 
 function resetEvalForm() {
@@ -468,15 +503,101 @@ function resetEvalForm() {
   Object.keys(evalSessionData).forEach(key => delete evalSessionData[key]);
   currentIdea = '';
   clearEvalError();
-  document.getElementById('eval-dashboard').classList.remove('visible');
+  evalDashboard.classList.remove('visible');
+  clearDashboardContent();
+  clearEvalPermalink();
+  setEvalFormVisible(true);
   updateDescriptionCounter();
   updateReview();
+
   if (currentStep === 1) {
     focusFirstField(getStep(1));
   } else {
     goToStep(1);
   }
+
+  evalForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+function getEvalUuidFromHash() {
+  const match = window.location.hash.match(/^#eval\/([^/?#]+)$/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function pushEvalPermalink(uuid) {
+  const hash = `#eval/${encodeURIComponent(uuid)}`;
+  history.pushState({ evalUuid: uuid }, '', hash);
+  updateShareFooter(uuid);
+}
+
+function clearEvalPermalink() {
+  history.pushState({}, '', '#');
+}
+
+function updateShareFooter(uuid = getEvalUuidFromHash()) {
+  if (!dashboardShare || !shareLinkInput) return;
+
+  if (!uuid) {
+    dashboardShare.hidden = true;
+    shareLinkInput.value = '';
+    return;
+  }
+
+  shareLinkInput.value = `${window.location.origin}${window.location.pathname}#eval/${encodeURIComponent(uuid)}`;
+  dashboardShare.hidden = false;
+}
+
+async function copyEvalLink() {
+  if (!shareLinkInput?.value) return;
+
+  try {
+    await navigator.clipboard.writeText(shareLinkInput.value);
+    if (copyLinkStatus) copyLinkStatus.textContent = 'Enlace copiado.';
+  } catch (error) {
+    shareLinkInput.select();
+    if (copyLinkStatus) copyLinkStatus.textContent = 'No se pudo copiar automáticamente. Selecciona y copia el enlace.';
+  }
+}
+
+async function loadEvaluationFromHash() {
+  const uuid = getEvalUuidFromHash();
+  if (!uuid) {
+    setEvalFormVisible(true);
+    evalDashboard.classList.remove('visible');
+    clearDashboardContent();
+    return false;
+  }
+
+  clearEvalError();
+  setEvalFormVisible(false);
+
+  try {
+    const res = await fetch(`${API_BASE}/evaluacion/${encodeURIComponent(uuid)}/`);
+    if (!res.ok) throw new Error(`Evaluación no encontrada: ${res.status}`);
+
+    const data = await res.json();
+    const resultado = data?.resultado || data;
+    if (!resultado || typeof resultado !== 'object') throw new Error('Respuesta inválida');
+
+    renderDash(resultado, { uuid, scroll: false });
+    evalDashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return true;
+  } catch (error) {
+    setEvalFormVisible(true);
+    evalDashboard.classList.remove('visible');
+    clearDashboardContent();
+    return false;
+  }
+}
+
+function initEvalPermalinks() {
+  copyLinkBtn?.addEventListener('click', copyEvalLink);
+  window.addEventListener('popstate', loadEvaluationFromHash);
+  window.addEventListener('hashchange', loadEvaluationFromHash);
+  loadEvaluationFromHash();
+}
+
+initEvalPermalinks();
 
 function askDeep() {
   alert('Esta función abre el chat de orientación personalizada con la IA. Disponible en el plan Brote.');
