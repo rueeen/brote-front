@@ -282,36 +282,84 @@ async function runEval() {
 }
 
 function renderDash(r) {
+  const escapeHtml = (value = '') => String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+  const safeScore = value => Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
   const labels = { innovacion:'Innovación', escalabilidad:'Escalabilidad', mercado:'Mercado', originalidad:'Originalidad', viabilidad:'Viabilidad' };
   const colors = { innovacion:'#FF6B2B', escalabilidad:'#FF6B2B', mercado:'#ffb43c', originalidad:'#bf5fff', viabilidad:'#3de0ff' };
+  const foda = r.foda || {};
+  const presupuesto = r.presupuesto || {};
+  const factibilidad = r.factibilidad || {};
 
   const scores = document.getElementById('dash-scores');
   scores.innerHTML = '';
-  Object.entries(r.puntajes).forEach(([k, v]) => {
-    scores.innerHTML += `<div class="dash-score-card"><div class="dsc-label">${labels[k]}</div><div class="dsc-val" style="color:${colors[k]}">${Math.round(v)}</div><div class="dsc-bar-bg"><div class="dsc-bar" style="width:0%;background:${colors[k]}" data-w="${Math.round(v)}"></div></div></div>`;
+  Object.entries(r.puntajes || {}).forEach(([k, v]) => {
+    const score = safeScore(v);
+    const label = labels[k] || k;
+    const color = colors[k] || 'var(--orange)';
+    scores.innerHTML += `<div class="dash-score-card"><div class="dsc-label">${escapeHtml(label)}</div><div class="dsc-val" style="color:${color}">${score}</div><div class="dsc-bar-bg"><div class="dsc-bar" style="width:0%;background:${color}" data-w="${score}"></div></div></div>`;
   });
-  scores.innerHTML += `<div class="dash-score-card" style="border-color:rgba(255,107,43,0.25)"><div class="dsc-label">Global</div><div class="dsc-val" style="color:var(--orange)">${Math.round(r.puntaje_global)}</div><div class="dsc-bar-bg"><div class="dsc-bar" style="width:0%;background:var(--orange)" data-w="${Math.round(r.puntaje_global)}"></div></div></div>`;
+  const globalScore = safeScore(r.puntaje_global);
+  scores.innerHTML += `<div class="dash-score-card" style="border-color:rgba(255,107,43,0.25)"><div class="dsc-label">Global</div><div class="dsc-val" style="color:var(--orange)">${globalScore}</div><div class="dsc-bar-bg"><div class="dsc-bar" style="width:0%;background:var(--orange)" data-w="${globalScore}"></div></div></div>`;
 
-  document.getElementById('verdict-panel').innerHTML = `<div class="v-emoji">${r.veredicto_emoji}</div><div><div class="v-title">${r.veredicto_titulo}</div><div class="v-text">${r.veredicto_texto}</div></div>`;
+  document.getElementById('verdict-panel').innerHTML = `<div class="v-emoji">${escapeHtml(r.veredicto_emoji || '🌱')}</div><div><div class="v-title">${escapeHtml(r.veredicto_titulo || 'Resultado BROTE')}</div><div class="v-text">${escapeHtml(r.veredicto_texto || '')}</div></div>`;
 
   document.getElementById('budget-grid').innerHTML = `
-    <div class="bg-card"><div class="bg-label">MVP</div><div class="bg-val">${r.presupuesto.mvp}</div></div>
-    <div class="bg-card"><div class="bg-label">Lanzamiento</div><div class="bg-val">${r.presupuesto.lanzamiento}</div></div>
-    <div class="bg-card"><div class="bg-label">Escalar</div><div class="bg-val">${r.presupuesto.escala}</div></div>`;
+    <div class="bg-card"><div class="bg-label">MVP</div><div class="bg-val">${escapeHtml(presupuesto.mvp || '—')}</div></div>
+    <div class="bg-card"><div class="bg-label">Lanzamiento</div><div class="bg-val">${escapeHtml(presupuesto.lanzamiento || '—')}</div></div>
+    <div class="bg-card"><div class="bg-label">Escalar</div><div class="bg-val">${escapeHtml(presupuesto.escala || '—')}</div></div>`;
+
+  const budgetNotes = document.getElementById('budget-notes');
+  const notes = Array.isArray(presupuesto.notas) ? presupuesto.notas.join(' ') : presupuesto.notas;
+  budgetNotes.textContent = notes || '';
+  budgetNotes.style.display = notes ? 'block' : 'none';
+
+  const levelClass = nivel => {
+    const normalized = String(nivel || '').toLowerCase();
+    if (normalized === 'alta') return 'level-high';
+    if (normalized === 'media') return 'level-medium';
+    if (normalized === 'baja') return 'level-low';
+    return '';
+  };
+  const feasibilityLabels = {
+    tecnica: 'Técnica',
+    financiera: 'Financiera',
+    legal: 'Legal',
+    mercado: 'Mercado'
+  };
+  document.getElementById('feasibility-grid').innerHTML = Object.entries(feasibilityLabels).map(([key, label]) => {
+    const item = factibilidad[key] || {};
+    const nivel = item.nivel || '—';
+    return `<div class="feasibility-card">
+      <div class="feasibility-head">
+        <div class="feasibility-title">${escapeHtml(label)}</div>
+        <span class="feasibility-level ${levelClass(nivel)}">${escapeHtml(nivel)}</span>
+      </div>
+      <p>${escapeHtml(item.descripcion || 'Sin descripción disponible.')}</p>
+    </div>`;
+  }).join('');
 
   const cl = document.getElementById('comp-list');
   cl.innerHTML = '';
-  (r.competencia||[]).slice(0,4).forEach(c => {
-    const cls = c.tipo==='directa'?'comp-direct':c.tipo==='indirecta'?'comp-indirect':'comp-none';
-    const lbl = c.tipo==='directa'?'Directa':c.tipo==='indirecta'?'Indirecta':'Sin rival';
-    cl.innerHTML += `<div class="comp-item"><div><div class="comp-name">${c.nombre}</div><div class="comp-desc">${c.descripcion}</div></div><span class="comp-tag ${cls}">${lbl}</span></div>`;
+  (r.competencia || []).slice(0, 4).forEach(c => {
+    const cls = c.tipo === 'directa' ? 'comp-direct' : c.tipo === 'indirecta' ? 'comp-indirect' : 'comp-none';
+    const lbl = c.tipo === 'directa' ? 'Directa' : c.tipo === 'indirecta' ? 'Indirecta' : 'Sin rival';
+    const url = c.url ? `<a class="comp-url" href="${escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer">Visitar</a>` : '';
+    cl.innerHTML += `<div class="comp-item"><div><div class="comp-name">${escapeHtml(c.nombre || 'Competidor')}</div><div class="comp-desc">${escapeHtml(c.descripcion || '')}</div>${url}</div><span class="comp-tag ${cls}">${lbl}</span></div>`;
   });
 
-  document.getElementById('strengths').innerHTML = (r.fortalezas||[]).map(f=>`<span class="pill pill-g">✓ ${f}</span>`).join('');
-  document.getElementById('risks').innerHTML = (r.riesgos||[]).map(f=>`<span class="pill pill-r">⚠ ${f}</span>`).join('');
+  const pillList = (items, className, icon) => (Array.isArray(items) ? items : []).map(item => `<span class="pill ${className}">${icon} ${escapeHtml(item)}</span>`).join('');
+  document.getElementById('strengths').innerHTML = pillList(foda.fortalezas, 'pill-g', '✓');
+  document.getElementById('risks').innerHTML = pillList(foda.amenazas, 'pill-r', '⚠');
+  document.getElementById('opportunities').innerHTML = pillList(foda.oportunidades, 'pill-o', '↗');
+  document.getElementById('weaknesses').innerHTML = pillList(foda.debilidades, 'pill-w', '!');
 
   const tl = document.getElementById('tips-list');
-  tl.innerHTML = (r.recomendaciones||[]).map((t,i)=>`<div class="tip-item"><span class="tip-n">0${i+1}</span><span>${t}</span></div>`).join('');
+  tl.innerHTML = (r.recomendaciones || []).map((t, i) => `<div class="tip-item"><span class="tip-n">${String(i + 1).padStart(2, '0')}</span><span>${escapeHtml(t)}</span></div>`).join('');
 
   const dash = document.getElementById('eval-dashboard');
   dash.classList.add('visible');
