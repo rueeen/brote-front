@@ -320,7 +320,7 @@ async function runEval() {
 
   const btn = document.getElementById('eval-btn');
   const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), 30000);
+  const timeoutId = window.setTimeout(() => controller.abort(), 90000);
 
   btn.disabled = true;
   btn.classList.add('loading');
@@ -389,8 +389,8 @@ function renderDash(r, { uuid = null, scroll = true } = {}) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
   const safeScore = value => Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
-  const labels = { innovacion:'Innovación', escalabilidad:'Escalabilidad', mercado:'Mercado', originalidad:'Originalidad', viabilidad:'Viabilidad' };
-  const colors = { innovacion:'#FF6B2B', escalabilidad:'#FF6B2B', mercado:'#ffb43c', originalidad:'#bf5fff', viabilidad:'#3de0ff' };
+  const labels = { innovacion: 'Innovación', escalabilidad: 'Escalabilidad', mercado: 'Mercado', originalidad: 'Originalidad', viabilidad: 'Viabilidad' };
+  const colors = { innovacion: '#FF6B2B', escalabilidad: '#FF6B2B', mercado: '#ffb43c', originalidad: '#bf5fff', viabilidad: '#3de0ff' };
   const foda = r.foda || {};
   const presupuesto = r.presupuesto || {};
   const factibilidad = r.factibilidad || {};
@@ -466,7 +466,7 @@ function renderDash(r, { uuid = null, scroll = true } = {}) {
 
   setTimeout(() => {
     evalDashboard.querySelectorAll('.dsc-bar').forEach(b => { b.style.width = b.dataset.w + '%'; });
-    if (scroll) evalDashboard.scrollIntoView({ behavior:'smooth', block:'start' });
+    if (scroll) evalDashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 100);
 }
 
