@@ -40,18 +40,6 @@ let currentIdea = '';
 let currentStep = 1;
 let isStepAnimating = false;
 const evalSessionData = {};
-const loadingMessages = [
-  'Analizando tu idea...',
-  'Evaluando el mercado chileno...',
-  'Calculando factibilidad...',
-  'Buscando competencia...',
-  'Estimando presupuesto en USD...',
-  'Generando recomendaciones...'
-];
-let loadingMessagesTimer = null;
-let loadingMessageFadeTimer = null;
-let loadingMessageIndex = 0;
-
 const rubroLabels = {
   tecnologia: 'Tecnología',
   gastronomia: 'Gastronomía',
@@ -117,38 +105,40 @@ function clearEvalError() {
 
 function startLoadingMessages() {
   stopLoadingMessages();
-  if (!evalLoadingMsg) return;
-
-  loadingMessageIndex = 0;
-  evalLoadingMsg.textContent = loadingMessages[loadingMessageIndex];
-  evalLoadingMsg.classList.add('visible');
-  evalLoadingMsg.classList.remove('changing');
-
-  loadingMessagesTimer = window.setInterval(() => {
-    evalLoadingMsg.classList.add('changing');
-
-    loadingMessageFadeTimer = window.setTimeout(() => {
-      loadingMessageIndex = (loadingMessageIndex + 1) % loadingMessages.length;
-      evalLoadingMsg.textContent = loadingMessages[loadingMessageIndex];
-      evalLoadingMsg.classList.remove('changing');
-      loadingMessageFadeTimer = null;
-    }, 300);
+  const el = document.getElementById('eval-loading-msg');
+  if (!el) return;
+  const messages = [
+    'Analizando tu idea...',
+    'Evaluando el mercado chileno...',
+    'Calculando factibilidad...',
+    'Buscando competencia...',
+    'Estimando presupuesto en USD...',
+    'Generando recomendaciones...'
+  ];
+  let i = 0;
+  el.textContent = messages[0];
+  el.classList.add('visible');
+  window._evalMsgInterval = window.setInterval(() => {
+    i = (i + 1) % messages.length;
+    el.style.opacity = '0';
+    setTimeout(() => {
+      el.textContent = messages[i];
+      el.style.opacity = '1';
+    }, 250);
   }, 2500);
 }
 
 function stopLoadingMessages() {
-  if (loadingMessagesTimer) {
-    window.clearInterval(loadingMessagesTimer);
-    loadingMessagesTimer = null;
+  if (window._evalMsgInterval) {
+    clearInterval(window._evalMsgInterval);
+    window._evalMsgInterval = null;
   }
-  if (loadingMessageFadeTimer) {
-    window.clearTimeout(loadingMessageFadeTimer);
-    loadingMessageFadeTimer = null;
+  const el = document.getElementById('eval-loading-msg');
+  if (el) {
+    el.classList.remove('visible');
+    el.textContent = '';
+    el.style.opacity = '';
   }
-
-  if (!evalLoadingMsg) return;
-  evalLoadingMsg.classList.remove('visible', 'changing');
-  evalLoadingMsg.textContent = '';
 }
 
 function updateDescriptionCounter() {
@@ -381,6 +371,12 @@ async function runEval() {
   }
 }
 
+function colorPorPuntaje(v) {
+  if (v >= 70) return 'var(--sem-good)';
+  if (v >= 40) return 'var(--sem-mid)';
+  return 'var(--sem-bad)';
+}
+
 function renderDash(r, { uuid = null, scroll = true } = {}) {
   const escapeHtml = (value = '') => String(value)
     .replace(/&/g, '&amp;')
@@ -390,7 +386,6 @@ function renderDash(r, { uuid = null, scroll = true } = {}) {
     .replace(/'/g, '&#039;');
   const safeScore = value => Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
   const labels = { innovacion: 'Innovación', escalabilidad: 'Escalabilidad', mercado: 'Mercado', originalidad: 'Originalidad', viabilidad: 'Viabilidad' };
-  const colors = { innovacion: '#FF6B2B', escalabilidad: '#FF6B2B', mercado: '#ffb43c', originalidad: '#bf5fff', viabilidad: '#3de0ff' };
   const foda = r.foda || {};
   const presupuesto = r.presupuesto || {};
   const factibilidad = r.factibilidad || {};
@@ -400,13 +395,17 @@ function renderDash(r, { uuid = null, scroll = true } = {}) {
   Object.entries(r.puntajes || {}).forEach(([k, v]) => {
     const score = safeScore(v);
     const label = labels[k] || k;
-    const color = colors[k] || 'var(--orange)';
+    const color = colorPorPuntaje(score);
     scores.innerHTML += `<div class="dash-score-card"><div class="dsc-label">${escapeHtml(label)}</div><div class="dsc-val" style="color:${color}">${score}</div><div class="dsc-bar-bg"><div class="dsc-bar" style="width:0%;background:${color}" data-w="${score}"></div></div></div>`;
   });
   const globalScore = safeScore(r.puntaje_global);
-  scores.innerHTML += `<div class="dash-score-card" style="border-color:rgba(255,107,43,0.25)"><div class="dsc-label">Global</div><div class="dsc-val" style="color:var(--orange)">${globalScore}</div><div class="dsc-bar-bg"><div class="dsc-bar" style="width:0%;background:var(--orange)" data-w="${globalScore}"></div></div></div>`;
+  const globalColor = colorPorPuntaje(globalScore);
+  scores.innerHTML += `<div class="dash-score-card" style="border-color:${globalColor}"><div class="dsc-label">Global</div><div class="dsc-val" style="color:${globalColor}">${globalScore}</div><div class="dsc-bar-bg"><div class="dsc-bar" style="width:0%;background:${globalColor}" data-w="${globalScore}"></div></div></div>`;
 
-  document.getElementById('verdict-panel').innerHTML = `<div class="v-emoji">${escapeHtml(r.veredicto_emoji || '🌱')}</div><div><div class="v-title">${escapeHtml(r.veredicto_titulo || 'Resultado BROTE')}</div><div class="v-text">${escapeHtml(r.veredicto_texto || '')}</div></div>`;
+  const vp = document.getElementById('verdict-panel');
+  vp.innerHTML = `<div class="v-emoji">${escapeHtml(r.veredicto_emoji || '🌱')}</div><div><div class="v-title">${escapeHtml(r.veredicto_titulo || 'Resultado BROTE')}</div><div class="v-text">${escapeHtml(r.veredicto_texto || '')}</div></div>`;
+  vp.classList.remove('verdict-good','verdict-mid','verdict-bad');
+  vp.classList.add(globalScore >= 70 ? 'verdict-good' : globalScore >= 40 ? 'verdict-mid' : 'verdict-bad');
 
   document.getElementById('budget-grid').innerHTML = `
     <div class="bg-card"><div class="bg-label">MVP</div><div class="bg-val">${escapeHtml(presupuesto.mvp || '—')}</div></div>
@@ -434,7 +433,7 @@ function renderDash(r, { uuid = null, scroll = true } = {}) {
   document.getElementById('feasibility-grid').innerHTML = Object.entries(feasibilityLabels).map(([key, label]) => {
     const item = factibilidad[key] || {};
     const nivel = item.nivel || '—';
-    return `<div class="feasibility-card">
+    return `<div class="feasibility-card" data-level="${escapeHtml(nivel)}">
       <div class="feasibility-head">
         <div class="feasibility-title">${escapeHtml(label)}</div>
         <span class="feasibility-level ${levelClass(nivel)}">${escapeHtml(nivel)}</span>
