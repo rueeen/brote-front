@@ -258,15 +258,20 @@
             </div>
             <div class="form-nav">
               <button class="form-back" type="button" data-prev="3">Atrás</button>
-              <button class="eval-btn" id="eval-btn" type="button" onclick="runEval()">
-                <div class="spinner"></div>
-                <span class="btn-txt">✦ Evaluar mi idea</span>
-              </button>
+              <div class="eval-action">
+                <button class="eval-btn" id="eval-btn" type="button" onclick="runEval()">
+                  <div class="spinner"></div>
+                  <span class="btn-txt">✦ Evaluar mi idea</span>
+                </button>
+                <span class="eval-loading-msg" id="eval-loading-msg" aria-live="polite"></span>
+              </div>
             </div>
           </div>
         </form>
 
-        <div class="eval-error" id="eval-error"></div>
+        <div class="eval-error" id="eval-error">
+          <button class="eval-retry-btn" type="button" onclick="runEval()">Reintentar</button>
+        </div>
       </div>
 
       <div class="eval-dashboard" id="eval-dashboard">
