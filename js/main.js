@@ -40,6 +40,17 @@ let currentIdea = '';
 let currentStep = 1;
 let isStepAnimating = false;
 const evalSessionData = {};
+const loadingMessages = [
+  'Analizando tu idea...',
+  'Evaluando el mercado chileno...',
+  'Calculando factibilidad...',
+  'Buscando competencia...',
+  'Estimando presupuesto en USD...',
+  'Generando recomendaciones...'
+];
+let loadingMessagesTimer = null;
+let loadingMessageFadeTimer = null;
+let loadingMessageIndex = 0;
 
 const rubroLabels = {
   tecnologia: 'Tecnología',
@@ -54,6 +65,7 @@ const rubroLabels = {
 
 const evalForm = document.getElementById('eval-form');
 const evalError = document.getElementById('eval-error');
+const evalLoadingMsg = document.getElementById('eval-loading-msg');
 const descriptionInput = document.getElementById('descripcion');
 const descriptionCounter = document.getElementById('descripcion-counter');
 
@@ -61,14 +73,64 @@ document.querySelectorAll('.form-step').forEach(step => {
   step.style.display = step.dataset.step === '1' ? 'block' : 'none';
 });
 
-function showEvalError(message) {
-  evalError.textContent = message;
-  evalError.style.display = 'block';
+function showEvalError(message, { showRetry = false } = {}) {
+  evalError.innerHTML = '';
+
+  const messageEl = document.createElement('span');
+  messageEl.textContent = message;
+  evalError.appendChild(messageEl);
+
+  if (showRetry) {
+    const retryBtn = document.createElement('button');
+    retryBtn.className = 'eval-retry-btn';
+    retryBtn.type = 'button';
+    retryBtn.textContent = 'Reintentar';
+    retryBtn.addEventListener('click', runEval);
+    evalError.appendChild(retryBtn);
+  }
+
+  evalError.style.display = 'flex';
 }
 
 function clearEvalError() {
-  evalError.textContent = '';
+  evalError.innerHTML = '';
   evalError.style.display = 'none';
+}
+
+function startLoadingMessages() {
+  stopLoadingMessages();
+  if (!evalLoadingMsg) return;
+
+  loadingMessageIndex = 0;
+  evalLoadingMsg.textContent = loadingMessages[loadingMessageIndex];
+  evalLoadingMsg.classList.add('visible');
+  evalLoadingMsg.classList.remove('changing');
+
+  loadingMessagesTimer = window.setInterval(() => {
+    evalLoadingMsg.classList.add('changing');
+
+    loadingMessageFadeTimer = window.setTimeout(() => {
+      loadingMessageIndex = (loadingMessageIndex + 1) % loadingMessages.length;
+      evalLoadingMsg.textContent = loadingMessages[loadingMessageIndex];
+      evalLoadingMsg.classList.remove('changing');
+      loadingMessageFadeTimer = null;
+    }, 300);
+  }, 2500);
+}
+
+function stopLoadingMessages() {
+  if (loadingMessagesTimer) {
+    window.clearInterval(loadingMessagesTimer);
+    loadingMessagesTimer = null;
+  }
+  if (loadingMessageFadeTimer) {
+    window.clearTimeout(loadingMessageFadeTimer);
+    loadingMessageFadeTimer = null;
+  }
+
+  if (!evalLoadingMsg) return;
+  evalLoadingMsg.classList.remove('visible', 'changing');
+  evalLoadingMsg.textContent = '';
 }
 
 function updateDescriptionCounter() {
@@ -252,14 +314,20 @@ async function runEval() {
   };
 
   const btn = document.getElementById('eval-btn');
-  btn.disabled = true; btn.classList.add('loading');
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 30000);
+
+  btn.disabled = true;
+  btn.classList.add('loading');
+  startLoadingMessages();
   document.getElementById('eval-dashboard').classList.remove('visible');
 
   try {
     const res = await fetch(`${API_BASE}/evaluar/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: controller.signal
     });
 
     if (!res.ok) {
@@ -268,16 +336,41 @@ async function runEval() {
         429: 'Alcanzaste el límite de evaluaciones por hora',
         502: 'La IA no pudo procesar tu idea, intenta de nuevo'
       };
-      showEvalError(messagesByStatus[res.status] || 'Error al evaluar. Por favor intenta de nuevo.');
+      let apiMessage = messagesByStatus[res.status] || 'Error al evaluar. Por favor intenta de nuevo.';
+
+      try {
+        const errorData = await res.json();
+        const knownApiMessage = errorData?.message || errorData?.mensaje || errorData?.detail || errorData?.error;
+        if (typeof knownApiMessage === 'string' && knownApiMessage.trim()) {
+          apiMessage = knownApiMessage.trim();
+        }
+      } catch (parseError) {
+        // Mantener mensaje conocido por status si la API no devuelve JSON válido.
+      }
+
+      showEvalError(apiMessage);
       return;
     }
 
     const data = await res.json();
     renderDash(data.resultado);
-  } catch(e) {
-    showEvalError('No se pudo conectar con el servidor. ¿Está corriendo el backend?');
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      showEvalError('La evaluación está tardando más de lo normal. Esto suele suceder cuando el servicio de IA está saturado. Intenta de nuevo en unos minutos.', { showRetry: true });
+      return;
+    }
+
+    if (error instanceof TypeError) {
+      showEvalError('No se pudo conectar con el servidor. ¿Está corriendo el backend?', { showRetry: true });
+      return;
+    }
+
+    showEvalError('Error al evaluar. Por favor intenta de nuevo.');
   } finally {
-    btn.disabled = false; btn.classList.remove('loading');
+    window.clearTimeout(timeoutId);
+    stopLoadingMessages();
+    btn.disabled = false;
+    btn.classList.remove('loading');
   }
 }
 
