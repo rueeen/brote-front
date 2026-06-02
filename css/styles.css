@@ -688,7 +688,7 @@ section { position: relative; z-index: 1; }
   display: inline-flex; align-items: center; gap: 8px;
   background: transparent; color: var(--orange);
   padding: 12px 24px; border-radius: var(--radius);
-  border: 1px solid rgba(74,255,122,0.3);
+  border: 1px solid rgba(255,107,43,0.3);
   font-size: 14px; font-weight: 500; cursor: pointer;
   font-family: var(--font-body); transition: background 0.2s;
 }
@@ -828,4 +828,82 @@ footer {
   .rubro-grid { grid-template-columns: 1fr; }
   .form-nav { flex-direction: column-reverse; align-items: stretch; }
   .form-next, .form-back, .form-nav .eval-btn { width: 100%; }
+}
+
+.dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.dashboard-share {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.75fr) minmax(240px, 1.25fr);
+  gap: 16px;
+  align-items: center;
+  background: linear-gradient(145deg, rgba(255,107,43,0.10), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,107,43,0.24);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.dashboard-share[hidden] { display: none; }
+.dashboard-share-copy span {
+  display: block;
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--orange);
+  margin-bottom: 4px;
+}
+.dashboard-share-copy p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.5;
+  margin: 0;
+  font-weight: 300;
+}
+.dashboard-share-controls { display: flex; gap: 10px; }
+.share-link-input {
+  min-width: 0;
+  flex: 1;
+  background: rgba(0,0,0,0.24);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  color: var(--text2);
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 12px 14px;
+}
+.share-link-input:focus { outline: 1px solid rgba(255,107,43,0.35); border-color: rgba(255,107,43,0.35); }
+.copy-link-btn {
+  background: var(--orange);
+  border: 1px solid var(--orange);
+  border-radius: var(--radius);
+  color: #fff;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 12px 16px;
+  transition: opacity 0.2s, transform 0.2s;
+  white-space: nowrap;
+}
+.copy-link-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.copy-link-status {
+  color: var(--text3);
+  font-size: 12px;
+  grid-column: 2;
+}
+
+@media (max-width: 768px) {
+  .dashboard-share {
+    grid-template-columns: 1fr;
+  }
+  .dashboard-share-controls {
+    flex-direction: column;
+  }
+  .copy-link-status {
+    grid-column: auto;
+  }
 }
