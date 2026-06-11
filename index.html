@@ -6,7 +6,7 @@
 <title>BROTE — Evalúa tu idea</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..800,70,1&family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,300..800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 
 </head>
@@ -45,12 +45,12 @@
   <div class="hero-badge">IA para emprendedores chilenos</div>
   <h1 class="hero-h1">
     Tu idea<br>
-    <span class="green">merece</span><br>
+    <span class="accent-word">merece</span><br>
     <span class="outline">brotar.</span>
   </h1>
   <p class="hero-sub">Evalúa el potencial de tu idea de negocio con inteligencia artificial. Descubre su originalidad, escalabilidad y el presupuesto que necesitas.</p>
   <div class="hero-btns">
-    <a href="javascript:void(0)" onclick="scrollTo_('evaluador')" class="btn-primary" style="background:var(--orange);color:#fff;">Evaluar mi idea →</a>
+    <a href="javascript:void(0)" onclick="scrollTo_('evaluador')" class="btn-primary">Evaluar mi idea →</a>
     <a href="javascript:void(0)" onclick="scrollTo_('como-funciona')" class="btn-outline">Ver cómo funciona</a>
   </div>
   <div class="hero-stats">
@@ -104,13 +104,13 @@
 <section id="evaluador">
   <div class="section-wrap">
     <div class="section-tag">Herramienta</div>
-    <h2 class="section-title">Evalúa tu idea<br><span style="color:var(--orange)">ahora mismo.</span></h2>
+    <h2 class="section-title">Evalúa tu idea<br><span class="text-accent">ahora mismo.</span></h2>
     <p class="section-sub">Describe tu proyecto o negocio y obtén un análisis completo impulsado por inteligencia artificial.</p>
 
     <div class="eval-container">
       <div class="eval-header">
         <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
-        <h3 style="margin-left:8px">Evaluador BROTE</h3>
+        <h3>Evaluador BROTE</h3>
         <span>powered by Claude AI</span>
       </div>
       <div class="eval-body">
@@ -281,7 +281,7 @@
         <p class="budget-notes" id="budget-notes"></p>
         <div class="dash-section-title">Factibilidad</div>
         <div class="feasibility-grid" id="feasibility-grid"></div>
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:12px;font-weight:500;">Competencia detectada</div>
+        <div class="dash-section-title">Competencia detectada</div>
         <div class="comp-list" id="comp-list"></div>
         <div class="dash-two-col">
           <div class="dash-panel">
@@ -303,7 +303,7 @@
             <div class="pill-wrap" id="weaknesses"></div>
           </div>
         </div>
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:12px;font-weight:500;">Recomendaciones para mejorar</div>
+        <div class="dash-section-title">Recomendaciones para mejorar</div>
         <div class="tips-list" id="tips-list"></div>
         <div class="dashboard-actions">
           <button class="improve-btn btn-ghost" onclick="askDeep()">💬 Orientación personalizada →</button>
@@ -346,7 +346,7 @@
           <li class="off">Historial de ideas</li>
           <li class="off">Exportar informe PDF</li>
         </ul>
-        <a href="javascript:void(0)" onclick="scrollTo_('evaluador')" class="btn-outline" style="display:block;text-align:center;text-decoration:none;padding:12px;">Empezar gratis</a>
+        <a href="javascript:void(0)" onclick="scrollTo_('evaluador')" class="btn-outline price-action">Empezar gratis</a>
       </div>
       <div class="price-card featured">
         <div class="featured-badge">Más popular</div>
@@ -361,7 +361,7 @@
           <li>Historial de todas tus ideas</li>
           <li class="off">Exportar informe PDF</li>
         </ul>
-        <a href="javascript:void(0)" onclick="scrollTo_('contacto')" class="btn-primary" style="display:block;text-align:center;text-decoration:none;padding:12px;">Comenzar prueba</a>
+        <a href="javascript:void(0)" onclick="scrollTo_('contacto')" class="btn-primary price-action">Comenzar prueba</a>
       </div>
       <div class="price-card">
         <div class="pc-plan">Florece</div>
@@ -375,7 +375,7 @@
           <li>Soporte prioritario</li>
           <li>API access</li>
         </ul>
-        <a href="javascript:void(0)" onclick="scrollTo_('contacto')" class="btn-outline" style="display:block;text-align:center;text-decoration:none;padding:12px;">Contactar ventas</a>
+        <a href="javascript:void(0)" onclick="scrollTo_('contacto')" class="btn-outline price-action">Contactar ventas</a>
       </div>
     </div>
   </div>
@@ -392,7 +392,7 @@
       <div class="about-text">
         <p>BROTE nació en Arica, Chile, con una convicción simple: las mejores ideas no siempre llegan con el mejor análisis. Constanza Ledesma fundó esta plataforma para que emprendedores con visión no pierdan tiempo ni dinero por falta de validación temprana.</p>
         <p>Combinamos inteligencia artificial de última generación con el conocimiento del ecosistema latinoamericano para que cualquier persona pueda evaluar su idea con la misma rigurosidad que una aceleradora de Silicon Valley — sin importar si estás en Arica, Santiago o la Patagonia.</p>
-        <p style="color:var(--orange);font-weight:500;">Hecho en Arica. Pensado para el mundo.</p>
+        <p class="about-accent">Hecho en Arica. Pensado para el mundo.</p>
       </div>
       <div class="about-values">
         <div class="value-item">
@@ -410,8 +410,8 @@
       </div>
     </div>
 
-    <div class="section-tag" style="margin-top:24px">Preguntas frecuentes</div>
-    <h3 class="section-title" style="font-size:clamp(24px,3vw,36px);margin-bottom:32px">¿Tienes dudas?</h3>
+    <div class="section-tag faq-tag">Preguntas frecuentes</div>
+    <h3 class="section-title section-title-small">¿Tienes dudas?</h3>
     <div class="faq-list">
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">¿Cómo funciona la evaluación con IA? <span class="faq-chevron">+</span></button>
@@ -486,7 +486,7 @@
   <div class="footer-inner">
     <div class="footer-grid">
       <div class="footer-brand">
-        <div class="nav-logo" style="font-size:20px">BROTE<span style="color:var(--text)">.</span></div>
+        <div class="nav-logo footer-logo">BROTE<span>.</span></div>
         <p>Evalúa y desarrolla tus ideas de negocio con inteligencia artificial. Hecho en Chile para el mundo.</p>
       </div>
       <div class="footer-col">
