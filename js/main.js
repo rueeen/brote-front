@@ -27,11 +27,14 @@ function toggleFaq(btn) {
 
 // ── CONTACT FORM ──
 function submitContact() {
-  const n = document.getElementById('cf-nombre').value;
-  const e = document.getElementById('cf-email').value;
+  const n = document.getElementById('cf-nombre').value.trim();
+  const e = document.getElementById('cf-email').value.trim();
+  const asunto = document.getElementById('cf-asunto').value;
+  const mensaje = document.getElementById('cf-mensaje').value.trim();
   if (!n || !e) { alert('Por favor completa nombre y email.'); return; }
-  document.getElementById('contact-form-wrap').querySelector('.cf-submit').style.display = 'none';
-  document.getElementById('cf-success').style.display = 'block';
+  const subject = encodeURIComponent(asunto || 'Contacto desde BROTE');
+  const body = encodeURIComponent(`Nombre: ${n}\nEmail: ${e}\n\n${mensaje}`);
+  window.location.href = `mailto:hola@brote.cl?subject=${subject}&body=${body}`;
 }
 
 // ── EVALUADOR ──
@@ -112,7 +115,7 @@ function startLoadingMessages() {
     'Evaluando el mercado chileno...',
     'Calculando factibilidad...',
     'Buscando competencia...',
-    'Estimando presupuesto en USD...',
+    'Estimando presupuesto...',
     'Generando recomendaciones...'
   ];
   let i = 0;
@@ -142,9 +145,13 @@ function stopLoadingMessages() {
 }
 
 function updateDescriptionCounter() {
-  const count = descriptionInput.value.trim().length;
-  descriptionCounter.textContent = `${count} / ${MIN_DESCRIPTION_CHARS} mínimo`;
-  descriptionCounter.classList.toggle('ok', count >= MIN_DESCRIPTION_CHARS);
+  const text = descriptionInput.value.trim();
+  const chars = text.length;
+  const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
+  const charOk = chars >= MIN_DESCRIPTION_CHARS;
+  const wordOk = words >= 5;
+  descriptionCounter.textContent = `${chars} caracteres · ${words} palabras`;
+  descriptionCounter.classList.toggle('ok', charOk && wordOk);
 }
 
 function saveEvalSessionData() {
@@ -207,10 +214,19 @@ function validateStep(stepNumber) {
       return false;
     }
   }
-  if (stepNumber === 3 && evalSessionData.descripcion.trim().length < MIN_DESCRIPTION_CHARS) {
-    showEvalError('La descripción debe tener al menos 30 caracteres.');
-    descriptionInput.focus();
-    return false;
+  if (stepNumber === 3) {
+    if (evalSessionData.descripcion.trim().length < MIN_DESCRIPTION_CHARS) {
+      showEvalError('La descripción debe tener al menos 30 caracteres.');
+      descriptionInput.focus();
+      return false;
+    }
+
+    const words = evalSessionData.descripcion.trim().split(/\s+/).filter(Boolean);
+    if (words.length < 5) {
+      showEvalError('La descripción debe tener al menos 5 palabras.');
+      descriptionInput.focus();
+      return false;
+    }
   }
   clearEvalError();
   return true;
@@ -569,6 +585,7 @@ async function loadEvaluationFromHash() {
     evalDashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
     return true;
   } catch (error) {
+    showEvalError('No pudimos cargar esta evaluación. El enlace puede haber expirado o ser inválido.');
     setEvalFormVisible(true);
     evalDashboard.classList.remove('visible');
     clearDashboardContent();
@@ -586,5 +603,12 @@ function initEvalPermalinks() {
 initEvalPermalinks();
 
 function askDeep() {
-  alert('Esta función abre el chat de orientación personalizada con la IA. Disponible en el plan Brote.');
+  scrollTo_('precios');
+  const broteCard = document.querySelector('.price-card.featured');
+  if (broteCard) {
+    broteCard.style.outline = '3px solid var(--accent)';
+    setTimeout(() => {
+      broteCard.style.outline = '';
+    }, 2000);
+  }
 }
